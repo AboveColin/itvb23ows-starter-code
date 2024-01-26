@@ -14,13 +14,14 @@
     $to = [];
     foreach ($GLOBALS['OFFSETS'] as $pq) {
         foreach (array_keys($board) as $pos) {
-            $pq2 = explode(',', $pos);
-            $to[] = ($pq[0] + $pq2[0]).','.($pq[1] + $pq2[1]);
+            $newPos = ($pq[0] + $pq2[0]).','.($pq[1] + $pq2[1]);
+            if (!isset($board[$newPos])) {
+                $to[] = $newPos;
+            }
         }
     }
-    $to = array_filter($to, function($pos) use ($board) {
-        return !isset($board[$pos]);
-    });
+    $to = array_unique($to);
+    if (!count($to)) $to[] = '0,0';
 ?>
 <!DOCTYPE html>
 <html>
@@ -148,7 +149,8 @@
             <select name="from">
                 <?php
                     foreach (array_keys($board) as $pos) {
-                        if (isset($board[$pos]) && $board[$pos][count($board[$pos])-1][0] == $player) {
+                        $topTile = end($board[$pos]);
+                        if ($topTile[0] == $player) {
                             echo "<option value=\"$pos\">$pos</option>";
                         }
                     }
@@ -186,3 +188,4 @@
         </form>
     </body>
 </html>
+

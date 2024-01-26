@@ -14,6 +14,8 @@ services:
       - MYSQL_DB=hive
     networks:
     - default
+    volumes:
+      - .:/var/www/html
 
   db:
     image: mysql:8.0.33
@@ -22,7 +24,7 @@ services:
       - MYSQL_DATABASE=hive
     volumes:
       - db_data:/var/lib/mysql
-      - ./hive.sql:/docker-entrypoint-initdb.d/hive.sql
+      - ./Database/hive.sql:/docker-entrypoint-initdb.d/hive.sql
     networks:
     - default
 volumes:
