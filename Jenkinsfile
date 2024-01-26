@@ -1,42 +1,33 @@
 pipeline {
     agent any
 
-    environment {
-        MYSQL_HOST = 'db'
-        MYSQL_USER = 'root'
-        MYSQL_PASSWORD = '123456'
-        MYSQL_DB = 'hive'
-    }
-
-
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
-                echo 'Checking out code...'
-                // Get the latest code from the source control
+                echo 'Building the project...'
                 checkout scm
             }
         }
-        stage('Build') {
-            steps {
-                echo 'Building the Docker image...'
-                // Build the Docker image
-                sh 'docker-compose build'
-            }
-        }
+
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                // Run tests here
-                sh 'docker-compose run app vendor/bin/phpunit'
             }
         }
+
         stage('Deploy') {
             steps {
-                echo 'Deploying the application...'
-                // Deploy your application
-                sh 'docker-compose up -d'
+                echo 'Deploying...'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build successful! Deploying...'
+        }
+        failure {
+            echo 'Build failed! Notify the team...'
         }
     }
 }
