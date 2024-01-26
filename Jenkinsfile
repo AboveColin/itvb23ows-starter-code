@@ -19,7 +19,7 @@ pipeline {
           steps {
             script { scannerHome = tool 'SonarQube Scanner' }
             withSonarQubeEnv('SonarQube Scanner') {
-            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=sqp_a2b65a614ece26e2f2d8d8691a5ab072c584313b"
+            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=squ_40a6b9a557f6734c20f094281b3200aa6845c469"
             }
           }
         }
