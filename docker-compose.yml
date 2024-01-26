@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DB=hive
+    networks:
+    - default
+
+  db:
+    image: mysql:8.0.33
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=hive
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./hive.sql:/docker-entrypoint-initdb.d/hive.sql
+    networks:
+    - default
+volumes:
+  db_data:

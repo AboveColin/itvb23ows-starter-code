@@ -7,14 +7,14 @@ Groningen.
 This is a deliberately poor software project, containing bugs and missing features. It
 is not intended as a demonstration of proper software engineering techniques.
 
-The application contains PHP 5.6 code and should run using the built-in PHP server,
+The application contains PHP 8.3.1 code and should run using the built-in PHP server,
 which can be started using the following command.
 
 ```
 php -S localhost:8000
 ```
 
-In addition to PHP 5.6 or higher, the code requires the mysqli extension and a MySQL
+In addition to PHP 8.3.1 or higher, the code requires the mysqli extension and a MySQL
 or compatible server. The application assumes a root user without password, and tries
 to access the database `hive`. The file `hive.sql` contains the database schema.
 
