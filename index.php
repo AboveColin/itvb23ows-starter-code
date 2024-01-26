@@ -18,8 +18,9 @@
             $to[] = ($pq[0] + $pq2[0]).','.($pq[1] + $pq2[1]);
         }
     }
-    $to = array_unique($to);
-    if (!count($to)) $to[] = '0,0';
+    $to = array_filter($to, function($pos) use ($board) {
+        return !isset($board[$pos]);
+    });
 ?>
 <!DOCTYPE html>
 <html>
@@ -128,7 +129,9 @@
             <select name="piece">
                 <?php
                     foreach ($hand[$player] as $tile => $ct) {
-                        echo "<option value=\"$tile\">$tile</option>";
+                        if ($ct > 0) {
+                            echo "<option value=\"$tile\">$tile</option>";
+                        }
                     }
                 ?>
             </select>
@@ -145,7 +148,9 @@
             <select name="from">
                 <?php
                     foreach (array_keys($board) as $pos) {
-                        echo "<option value=\"$pos\">$pos</option>";
+                        if (isset($board[$pos]) && $board[$pos][count($board[$pos])-1][0] == $player) {
+                            echo "<option value=\"$pos\">$pos</option>";
+                        }
                     }
                 ?>
             </select>
