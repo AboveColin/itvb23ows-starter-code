@@ -15,7 +15,7 @@ services:
     networks:
     - default
     volumes:
-      - .:/var/www/html
+      - ./App:/var/www/html
 
   db:
     image: mysql:8.0.33

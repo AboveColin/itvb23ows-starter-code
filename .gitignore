@@ -1,2 +1,4 @@
 Sonarqube/.scannerwork/report-task.txt
 Sonarqube/.scannerwork/.sonar_lock
+.cursorignore
+game/

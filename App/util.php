@@ -38,10 +38,24 @@ function slide($board, $from, $to) {
     foreach ($GLOBALS['OFFSETS'] as $pq) {
         $p = $b[0] + $pq[0];
         $q = $b[1] + $pq[1];
-        if (isNeighbour($from, $p.",".$q)) $common[] = $p.",".$q;
+        $neighbourPos = $p.",".$q;
+        if (isNeighbour($from, $neighbourPos)) {
+            if (isset($board[$neighbourPos])) {
+                $common[] = $neighbourPos;
+            }
+        }
     }
-    if (!$board[$common[0]] && !$board[$common[1]] && !$board[$from] && !$board[$to]) return false;
-    return min(len($board[$common[0]]), len($board[$common[1]])) <= max(len($board[$from]), len($board[$to]));
+    if (count($common) != 2) return false;
+}
+
+function getValidPositions($board, $player) {
+    $to = [];
+    foreach ($board as $pos => $tile) {
+        if (hasNeighBour($pos, $board) && neighboursAreSameColor($player, $pos, $board)) {
+            $to[] = $pos;
+        }
+    }
+    return $to;
 }
 
 ?>

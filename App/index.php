@@ -1,138 +1,78 @@
 <?php
-    session_start();
+session_start();
+include_once 'util.php';
 
-    include_once 'util.php';
+if (!isset($_SESSION['board'])) {
+    header('Location: restart.php');
+    exit(0);
+}
 
-    if (!isset($_SESSION['board'])) {
-        header('Location: restart.php');
-        exit(0);
-    }
-    $board = $_SESSION['board'];
-    $player = $_SESSION['player'];
-    $hand = $_SESSION['hand'];
+$board = $_SESSION['board'];
+$player = $_SESSION['player'];
+$hand = $_SESSION['hand'];
 
+function calculatePositions($board, $offsets) {
     $to = [];
-    foreach ($GLOBALS['OFFSETS'] as $pq) {
+    foreach ($offsets as $pq) {
         foreach (array_keys($board) as $pos) {
-            $newPos = ($pq[0] + $pq2[0]).','.($pq[1] + $pq2[1]);
-            if (!isset($board[$newPos])) {
-                $to[] = $newPos;
-            }
+            list($p, $q) = explode(',', $pos);
+            $to[] = ($pq[0] + $p) . ',' . ($pq[1] + $q);
         }
     }
-    $to = array_unique($to);
-    if (!count($to)) $to[] = '0,0';
+    return array_unique($to);
+}
+
+$to = calculatePositions($board, $GLOBALS['OFFSETS']);
+if (empty($to)) $to[] = '0,0';
+
+function displayTile($tile, $pos, $min_p, $min_q, $playerClass) {
+    list($p, $q) = explode(',', $pos);
+    $h = count($tile);
+    $left = ($p - $min_p) * 4 + ($q - $min_q) * 2;
+    $top = ($q - $min_q) * 4;
+    $stacked = $h > 1 ? 'stacked' : '';
+    $innerTile = htmlspecialchars($tile[$h-1][1]);
+    echo "<div class=\"tile $playerClass $stacked\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)<span>$innerTile</span></div>";
+}
+
+function getPlayerTiles($hand, $player) {
+    foreach ($hand[$player] as $tile => $ct) {
+        for ($i = 0; $i < $ct; $i++) {
+            echo '<div class="tile player' . $player . '"><span>' . htmlspecialchars($tile) . "</span></div> ";
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Hive</title>
-        <style>
-            div.board {
-                width: 60%;
-                height: 100%;
-                min-height: 500px;
-                float: left;
-                overflow: scroll;
-                position: relative;
-            }
-
-            div.board div.tile {
-                position: absolute;
-            }
-
-            div.tile {
-                display: inline-block;
-                width: 4em;
-                height: 4em;
-                border: 1px solid black;
-                box-sizing: border-box;
-                font-size: 50%;
-                padding: 2px;
-            }
-
-            div.tile span {
-                display: block;
-                width: 100%;
-                text-align: center;
-                font-size: 200%;
-            }
-
-            div.player0 {
-                color: black;
-                background: white;
-            }
-
-            div.player1 {
-                color: white;
-                background: black
-            }
-
-            div.stacked {
-                border-width: 3px;
-                border-color: red;
-                padding: 0;
-            }
-        </style>
+<head>
+    <title>Hive</title>
+    <link rel="stylesheet" href="/css/styling.css">
     </head>
-    <body>
-        <div class="board">
-            <?php
-                $min_p = 1000;
-                $min_q = 1000;
-                foreach ($board as $pos => $tile) {
-                    $pq = explode(',', $pos);
-                    if ($pq[0] < $min_p) $min_p = $pq[0];
-                    if ($pq[1] < $min_q) $min_q = $pq[1];
-                }
-                foreach (array_filter($board) as $pos => $tile) {
-                    $pq = explode(',', $pos);
-                    $pq[0];
-                    $pq[1];
-                    $h = count($tile);
-                    echo '<div class="tile player';
-                    echo $tile[$h-1][0];
-                    if ($h > 1) echo ' stacked';
-                    echo '" style="left: ';
-                    echo ($pq[0] - $min_p) * 4 + ($pq[1] - $min_q) * 2;
-                    echo 'em; top: ';
-                    echo ($pq[1] - $min_q) * 4;
-                    echo "em;\">($pq[0],$pq[1])<span>";
-                    echo $tile[$h-1][1];
-                    echo '</span></div>';
-                }
-            ?>
-        </div>
-        <div class="hand">
-            White:
-            <?php
-                foreach ($hand[0] as $tile => $ct) {
-                    for ($i = 0; $i < $ct; $i++) {
-                        echo '<div class="tile player0"><span>'.$tile."</span></div> ";
-                    }
-                }
-            ?>
-        </div>
-        <div class="hand">
-            Black:
-            <?php
-            foreach ($hand[1] as $tile => $ct) {
-                for ($i = 0; $i < $ct; $i++) {
-                    echo '<div class="tile player1"><span>'.$tile."</span></div> ";
-                }
-            }
-            ?>
-        </div>
-        <div class="turn">
-            Turn: <?php if ($player == 0) echo "White"; else echo "Black"; ?>
-        </div>
+<body>
+    <div class="board">
+        <?php
+        $min_p = 1000;
+        $min_q = 1000;
+        foreach ($board as $pos => $tile) {
+            list($p, $q) = explode(',', $pos);
+            $min_p = min($p, $min_p);
+            $min_q = min($q, $min_q);
+        }
+        foreach (array_filter($board) as $pos => $tile) {
+            displayTile($tile, $pos, $min_p, $min_q, 'player' . $tile[count($tile)-1][0]);
+        }
+        ?>
+    </div>
+    <div class="hand">White: <?php getPlayerTiles($hand, 0); ?></div>
+    <div class="hand">Black: <?php getPlayerTiles($hand, 1); ?></div>
+    <div class="turn">Turn: <?php echo $player == 0 ? "White" : "Black"; ?></div>
         <form method="post" action="play.php">
             <select name="piece">
                 <?php
                     foreach ($hand[$player] as $tile => $ct) {
-                        if ($ct > 0) {
-                            echo "<option value=\"$tile\">$tile</option>";
-                        }
+                        echo "<option value=\"$tile\">$tile</option>";
                     }
                 ?>
             </select>
@@ -149,10 +89,7 @@
             <select name="from">
                 <?php
                     foreach (array_keys($board) as $pos) {
-                        $topTile = end($board[$pos]);
-                        if ($topTile[0] == $player) {
-                            echo "<option value=\"$pos\">$pos</option>";
-                        }
+                        echo "<option value=\"$pos\">$pos</option>";
                     }
                 ?>
             </select>
@@ -175,11 +112,12 @@
         <ol>
             <?php
                 $db = include 'database.php';
-                $stmt = $db->prepare('SELECT * FROM moves WHERE game_id = '.$_SESSION['game_id']);
+                $stmt = $db->prepare('SELECT * FROM moves WHERE game_id = ?');
+                $stmt->bind_param('i', $_SESSION['game_id']);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 while ($row = $result->fetch_array()) {
-                    echo '<li>'.$row[2].' '.$row[3].' '.$row[4].'</li>';
+                    echo '<li>'.htmlspecialchars($row[2]).' '.htmlspecialchars($row[3]).' '.htmlspecialchars($row[4]).'</li>';
                 }
             ?>
         </ol>
