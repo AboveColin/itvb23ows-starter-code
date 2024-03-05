@@ -16,8 +16,8 @@ if (!$hand[$piece])
     $_SESSION['error'] = "Player does not have tile";
 elseif (isset($board[$to]))
     $_SESSION['error'] = 'Board position is not empty';
-elseif (array_sum($hand) == 8 && $piece != 'Q')
-    $_SESSION['error'] = 'Must play queen bee by the fourth move';
+elseif (array_sum($hand) == 8 && $piece != 'Q') #bug fix 3
+    $_SESSION['error'] = 'Must play queen bee by the fourth move'; #bug fix 3
 elseif (count($board) && !hasNeighBour($to, $board))
     $_SESSION['error'] = "board position has no neighbour";
 elseif (array_sum($hand) < 11 && !neighboursAreSameColor($player, $to, $board))
