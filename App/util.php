@@ -31,6 +31,8 @@ function len($tile) {
     return $tile ? count($tile) : 0;
 }
 
+
+
 function slide($board, $from, $to) {
     if (!hasNeighBour($to, $board)) return false;
     if (!isNeighbour($from, $to)) return false;
@@ -39,10 +41,18 @@ function slide($board, $from, $to) {
     foreach ($GLOBALS['OFFSETS'] as $pq) {
         $p = $b[0] + $pq[0];
         $q = $b[1] + $pq[1];
-        if (isNeighbour($from, $p.",".$q)) $common[] = $p.",".$q;
+        if (isNeighbour($from, "$p,$q")) $common[] = "$p,$q";
     }
-    if (!$board[$common[0]] && !$board[$common[1]] && !$board[$from] && !$board[$to]) return false;
-    return min(len($board[$common[0]]), len($board[$common[1]])) <= max(len($board[$from]), len($board[$to]));
+
+    if (count($common) < 2) return false;
+
+    $lenCommon0 = isset($board[$common[0]]) ? len($board[$common[0]]) : 0;
+    $lenCommon1 = isset($board[$common[1]]) ? len($board[$common[1]]) : 0;
+
+    $lenFrom = isset($board[$from]) ? len($board[$from]) : 0;
+    $lenTo = isset($board[$to]) ? len($board[$to]) : 0;
+
+    return min($lenCommon0, $lenCommon1) <= max($lenFrom, $lenTo);
 }
 
 function isValidPosition($position, $board, $player) {

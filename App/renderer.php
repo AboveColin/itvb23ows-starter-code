@@ -13,8 +13,6 @@ function displayTile($tile, $pos, $min_p, $min_q, $playerClass) {
     echo "<div class=\"tile $playerClass $stacked\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)<span>$innerTile</span></div>";
 }
 
-
-
 function displayError() {
     if (isset($_SESSION['error'])) {
         echo "<strong>{$_SESSION['error']}</strong>";
@@ -35,6 +33,14 @@ function renderBoard($board) {
     }
 }
 
+function getPlayerTiles($hand, $player) {
+    foreach ($hand[$player] as $tile => $ct) {
+        for ($i = 0; $i < $ct; $i++) {
+            echo '<div class="tile player' . $player . '"><span>' . $tile . "</span></div> ";
+        }
+    }
+}
+
 function renderHand($hand, $player) {
     echo getPlayerTiles($hand, $player);
 }
@@ -45,21 +51,24 @@ function displayTurn($player) {
 
 function displayPiece($hand, $player) {
     foreach ($hand[$player] as $tile => $ct) {
-        if ($ct > 0) { // alleen stukken die je nog hebt in je hand
+        if ($ct > 0) { 
+            // alleen stukken die je nog hebt in je hand
+            // bug fix 1
             echo "<option value=\"$tile\">$tile</option>";
         }
     }
 }
 
-
-function displayTo($to) {
-    foreach ($to as $pos) {
-        echo "<option value=\"$pos\">$pos</option>";
-    }
-}
-
-function displayFrom($board) {
+function displayFrom($board, $player) {
+    // laat alleen de stukken zien die je nog hebt in je hand
+    // bug fix 1
+    $from = [];
     foreach (array_keys($board) as $pos) {
+        if ($board[$pos][count($board[$pos])-1][0] == $player) {
+            $from[] = $pos;
+        }
+    }
+    foreach ($from as $pos) {
         echo "<option value=\"$pos\">$pos</option>";
     }
 }

@@ -13,15 +13,12 @@ $player = $_SESSION['player'];
 $hand = $_SESSION['hand'];
 
 function calculatePositions($board, $offsets, $player) {
+    // bug fix #1
     $validPositions = [];
 
-    // als het de eerste zet is, dan is alleen 0,0 een geldige zet
-    if (count($board) == 1) {
-        $firstPiecePosition = key($board);
-        list($p, $q) = explode(',', $firstPiecePosition);
+    if (count($board) == 1 && isset($board['0,0'])) {
         foreach ($offsets as $offset) {
-            $newPos = ($p + $offset[0]) . ',' . ($q + $offset[1]);
-            // Since it's the second move, all adjacent positions except where another piece exists are valid
+            $newPos = $offset[0] . ',' . $offset[1];
             if (!array_key_exists($newPos, $board)) {
                 $validPositions[] = $newPos;
             }
@@ -43,18 +40,21 @@ function calculatePositions($board, $offsets, $player) {
 }
 
 
+// Bug fix 1
 $to = calculatePositions($board, $GLOBALS['OFFSETS'], $player);
-?> <script> <?php echo "console.log('".json_encode($to)."')"; ?> </script> <?php
 if (empty($to)) $to[] = '0,0';
 
-function getPlayerTiles($hand, $player) {
-    foreach ($hand[$player] as $tile => $ct) {
-        for ($i = 0; $i < $ct; $i++) {
-            echo '<div class="tile player' . $player . '"><span>' . $tile . "</span></div> ";
-        }
+$moveto = [];
+foreach ($GLOBALS['OFFSETS'] as $pq) {
+    foreach (array_keys($board) as $pos) {
+        $pq2 = explode(',', $pos);
+        // echo ($pq[0] + $pq2[0]) . ',' . ($pq[1] + $pq2[1]);
+        $moveto[] = ($pq[0] + $pq2[0]) . ',' . ($pq[1] + $pq2[1]);
     }
 }
 
+$moveto = array_unique($moveto);
+if (!count($moveto)) $moveto[] = '0,0';
 
 function game() {
     $db = include 'database.php';
@@ -73,21 +73,25 @@ function game() {
 <head>
     <title>Hive</title>
     <link rel="stylesheet" href="/css/styling.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?">
     </head>
 <body>
     <div class="board">
         <?php renderBoard($board); ?>
     </div>
+    <hr>
     <div class="hand">White:
         <?php 
             renderHand($hand, 0); 
         ?>
     </div>
+    <hr>
     <div class="hand">Black: 
         <?php 
             renderHand($hand, 1); 
         ?>
     </div>
+    <hr>
     <div class="turn">Turn: 
         <?php 
             displayTurn($player); 
@@ -101,7 +105,9 @@ function game() {
             </select>
             <select name="to">
                 <?php
-                    displayTo($to);
+                    foreach ($to as $pos) {
+                        echo "<option value=\"$pos\">$pos</option>";
+                    }
                 ?>
             </select>
             <input type="submit" value="Play">
@@ -109,12 +115,14 @@ function game() {
         <form method="post" action="move.php">
             <select name="from">
                 <?php
-                    displayFrom($board);
+                    displayFrom($board, $player);
                 ?>
             </select>
             <select name="to">
                 <?php
-                    displayTo($to);
+                    foreach ($moveto as $pos) {
+                        echo "<option value=\"$pos\">$pos</option>";
+                    }
                 ?>
             </select>
             <input type="submit" value="Move">
