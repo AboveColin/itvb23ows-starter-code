@@ -1,60 +1,142 @@
 <?php
+namespace Colin\Hive;
 session_start();
-include_once 'util.php';
-include_once 'renderer.php';
+
+require 'vendor/autoload.php';
+use Colin\Hive\Database;
+use Colin\Hive\Game;
+use Colin\Hive\GameLogic;
+use Colin\Hive\GameRenderer;
+
+$host = getenv('MYSQL_HOST') ?: 'localhost';
+$user = getenv('MYSQL_USER') ?: 'root';
+$password = getenv('MYSQL_PASSWORD') ?: '';
+$database = getenv('MYSQL_DB') ?: 'hive';
+
+$db = new Database($host, $user, $password, $database);
+$gameLogic = new GameLogic();
+$game = new Game($db, $gameLogic);
+$gameRenderer = new GameRenderer();
+
+$game->startInitGame();
+
+$game->handlePostRequests();
 
 if (!isset($_SESSION['board'])) {
-    header('Location: restart.php');
+    $game->restart();
     exit(0);
 }
 
-$board = $_SESSION['board'];
-$player = $_SESSION['player'];
-$hand = $_SESSION['hand'];
-
-function calculatePositions($board, $offsets, $player) {
-    // bug fix #1
-    $validPositions = [];
-
-    if (count($board) == 1 && isset($board['0,0'])) {
-        foreach ($offsets as $offset) {
-            $newPos = $offset[0] . ',' . $offset[1];
-            if (!array_key_exists($newPos, $board)) {
-                $validPositions[] = $newPos;
-            }
-        }
-    } else {
-        // For moves after the second, calculate valid positions based on existing logic
-        foreach (array_keys($board) as $pos) {
-            list($p, $q) = explode(',', $pos);
-            foreach ($offsets as $offset) {
-                $newPos = ($p + $offset[0]) . ',' . ($q + $offset[1]);
-                if (!array_key_exists($newPos, $board) && isValidPosition($newPos, $board, $player)) {
-                    $validPositions[] = $newPos;
-                }
-            }
-        }
-    }
-
-    return array_unique($validPositions);
-}
-
+$board = $game->getBoard();
+$player = $game->getPlayer();
+$hand = $game->getHand();
 
 // Bug fix 1
-$to = calculatePositions($board, $GLOBALS['OFFSETS'], $player);
-if (empty($to)) $to[] = '0,0';
+$to = $gameLogic->calculatePositions($board, $gameLogic->getOffsets(), $player);
+
 
 $moveto = [];
-foreach ($GLOBALS['OFFSETS'] as $pq) {
+foreach ($gameLogic->getOffsets() as $pq) {
     foreach (array_keys($board) as $pos) {
         $pq2 = explode(',', $pos);
-        // echo ($pq[0] + $pq2[0]) . ',' . ($pq[1] + $pq2[1]);
         $moveto[] = ($pq[0] + $pq2[0]) . ',' . ($pq[1] + $pq2[1]);
     }
 }
 
 $moveto = array_unique($moveto);
 if (!count($moveto)) $moveto[] = '0,0';
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hive</title>
+    <link rel="stylesheet" href="/css/styling.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?">
+    </head>
+<body>
+    <div class="board">
+        <?php $gameRenderer->renderBoard($board); ?>
+    </div>
+    <hr>
+    <div class="hand">White:
+        <?php 
+            $gameRenderer->renderHand($hand, 0); 
+        ?>
+    </div>
+    <hr>
+    <div class="hand">Black: 
+        <?php 
+            $gameRenderer->renderHand($hand, 1); 
+        ?>
+    </div>
+    <hr>
+    <div class="turn">Turn: 
+        <?php 
+            $gameRenderer->displayTurn($player); 
+        ?>
+    </div>
+        <form method="post" action="index.php" name="GameAction">
+            <select name="piece">
+                <?php
+                    $gameRenderer->displayPiece($hand, $player);
+                ?>
+            </select>
+            <select name="to">
+                <?php
+                    foreach ($to as $pos) {
+                        echo "<option value=\"$pos\">$pos</option>";
+                    }
+                ?>
+            </select>
+            <input type="submit" value="Play">
+        </form>
+        
+        <form method="post" action="index.php">
+            <select name="from">
+                <?php
+                    $gameRenderer->displayFrom($board, $player);
+                ?>
+            </select>
+            <select name="to">
+                <?php
+                    foreach ($moveto as $pos) {
+                        echo "<option value=\"$pos\">$pos</option>";
+                    }
+                ?>
+            </select>
+            <input type="submit" value="Move">
+        </form>
+        <form method="post" action="index.php">
+            <input type="hidden" name="pass" value="true">
+            <input type="submit" value="Pass">
+        </form>
+        <form method="post" action="index.php">
+            <input type="hidden" name="restart" value="true">
+            <input type="submit" value="Restart">
+        </form>
+        <strong>
+            <?php
+                $gameRenderer->displayError();
+            ?>
+        </strong>
+        <ol>
+            <?php
+                $game->game();
+            ?>
+        </ol>
+        <form method="post" action="index.php">
+            <input type="hidden" name="undo" value="true">
+            <input type="submit" value="Undo">
+        </form>
+    </body>
+</html>
+
+<?php
+exit();
+
+
+
 
 function game() {
     $db = include 'database.php';
@@ -68,84 +150,3 @@ function game() {
 }
 
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Hive</title>
-    <link rel="stylesheet" href="/css/styling.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?">
-    </head>
-<body>
-    <div class="board">
-        <?php renderBoard($board); ?>
-    </div>
-    <hr>
-    <div class="hand">White:
-        <?php 
-            renderHand($hand, 0); 
-        ?>
-    </div>
-    <hr>
-    <div class="hand">Black: 
-        <?php 
-            renderHand($hand, 1); 
-        ?>
-    </div>
-    <hr>
-    <div class="turn">Turn: 
-        <?php 
-            displayTurn($player); 
-        ?>
-    </div>
-        <form method="post" action="play.php">
-            <select name="piece">
-                <?php
-                    displayPiece($hand, $player);
-                ?>
-            </select>
-            <select name="to">
-                <?php
-                    foreach ($to as $pos) {
-                        echo "<option value=\"$pos\">$pos</option>";
-                    }
-                ?>
-            </select>
-            <input type="submit" value="Play">
-        </form>
-        <form method="post" action="move.php">
-            <select name="from">
-                <?php
-                    displayFrom($board, $player);
-                ?>
-            </select>
-            <select name="to">
-                <?php
-                    foreach ($moveto as $pos) {
-                        echo "<option value=\"$pos\">$pos</option>";
-                    }
-                ?>
-            </select>
-            <input type="submit" value="Move">
-        </form>
-        <form method="post" action="pass.php">
-            <input type="submit" value="Pass">
-        </form>
-        <form method="post" action="restart.php">
-            <input type="submit" value="Restart">
-        </form>
-        <strong>
-            <?php
-                displayError()
-            ?>
-        </strong>
-        <ol>
-            <?php
-                game();
-            ?>
-        </ol>
-        <form method="post" action="undo.php">
-            <input type="submit" value="Undo">
-        </form>
-    </body>
-</html>
-
