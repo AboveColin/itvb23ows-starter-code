@@ -18,14 +18,15 @@ $gameLogic = new GameLogic();
 $game = new Game($db, $gameLogic);
 $gameRenderer = new GameRenderer();
 
+if (!isset($_SESSION['board'])) {
+    $game->restart();
+}
+
 $game->startInitGame();
 
 $game->handlePostRequests();
 
-if (!isset($_SESSION['board'])) {
-    $game->restart();
-    exit(0);
-}
+
 
 $board = $game->getBoard();
 $player = $game->getPlayer();
@@ -131,22 +132,3 @@ if (!count($moveto)) $moveto[] = '0,0';
         </form>
     </body>
 </html>
-
-<?php
-exit();
-
-
-
-
-function game() {
-    $db = include 'database.php';
-    $stmt = $db->prepare('SELECT * FROM moves WHERE game_id = ?');
-    $stmt->bind_param('i', $_SESSION['game_id']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_array()) {
-        echo '<li>'.htmlspecialchars($row[2]).' '.htmlspecialchars($row[3]).' '.htmlspecialchars($row[4]).'</li>';
-    }
-}
-
-?>

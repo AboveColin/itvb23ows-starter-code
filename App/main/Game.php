@@ -35,15 +35,32 @@ class Game {
     }
 
     public function getBoard() {
+        // print_r($this->board);
         return $this->board;
+    }
+
+    public function setBoard($board) {
+        $this->board = $board;
+    }
+
+    public function addToBoard($to, $piece) {
+        $this->board[$to] = $piece;
     }
 
     public function getPlayer() {
         return $this->player;
     }
 
+    public function setPlayer($player) {
+        $this->player = $player;
+    }
+
     public function getHand() {
         return $this->hand;
+    }
+
+    public function setHand($hand, $player) {
+        $this->hand[$player] = $hand;
     }
 
     public function getGameId() {
@@ -119,12 +136,56 @@ class Game {
         $_SESSION['player'] = 1 - $_SESSION['player'];
     }
 
+    // bug fix 5
     public function undo() {
-        $stmt = $this->db->prepare('SELECT * FROM moves WHERE id = '.$_SESSION['last_move']);
+
+        $stmt = $this->db->prepare('select * from moves where id = ?');
+        $stmt->bind_param('i', $_SESSION['last_move']);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_array();
-        $_SESSION['last_move'] = $result[5];
-        $this->db->set_state($result[6]);
+
+        if (!$result) {
+            $_SESSION['error'] = 'result empty';
+            return;
+        } else {
+            // haal de vorige move uit de database
+            $stmt = $this->db->prepare('DELETE FROM moves WHERE id = ?');
+            $stmt->bind_param('i', $_SESSION['last_move']);
+            $stmt->execute();
+
+            $_SESSION['last_move'] = $result['previous_id'];
+        }
+
+        // check of je wel een move hebt om terug te gaan
+        if ($result['prevous_id' == null]) {
+            $_SESSION['error'] = 'No moves to undo';
+            return;
+        } else {
+            // haal de vorige state op
+            $stmt = $this->db->prepare('select state from moves where id = ?');
+            $stmt->bind_param('i', $_SESSION['last_move']);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_array();
+            $this->db->set_state($result['state']);
+        }
+
+        
+        // if ($_SESSION['last_move'] == 0) {
+        //     $_SESSION['error'] = 'No moves to undo';
+        //     return;
+        // }
+
+        // // haal de laatste move op en zet de state terug
+
+        
+        // // zet de state terug
+        
+        // $this->db->set_state($result[6]);
+
+        
+
+        // $_SESSION['player'] = 1 - $_SESSION['player'];
+        
     }
 
     public function play($piece, $to) {
