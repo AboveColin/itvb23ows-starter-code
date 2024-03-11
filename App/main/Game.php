@@ -35,7 +35,6 @@ class Game {
     }
 
     public function getBoard() {
-        // print_r($this->board);
         return $this->board;
     }
 
@@ -113,20 +112,7 @@ class Game {
         $_SESSION['game_id'] = $this->db->insert_id();
     }
 
-    public function game() {
-        $stmt = $this->db->prepare('SELECT * FROM moves WHERE game_id = ?');
-        $stmt->bind_param('i', $_SESSION['game_id']);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        while ($row = $result->fetch_array()) {
-            if ($row[2] == 'play' || $row[2] == 'move') {
-                echo '<li>'.htmlspecialchars($row[2]).' '.htmlspecialchars($row[3]).' '.htmlspecialchars($row[4]).'</li>';
-            } else {
-                echo '<li>'.htmlspecialchars($row[2]) .'</li>';
-            }
-        } 
-    }
-
+    
     public function pass() {
         $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "pass", null, null, ?, ?)');
         $state = $this->db->get_state();
@@ -138,54 +124,47 @@ class Game {
 
     // bug fix 5
     public function undo() {
-
-        $stmt = $this->db->prepare('select * from moves where id = ?');
-        $stmt->bind_param('i', $_SESSION['last_move']);
+        // Fetch the last move from the database
+        $stmt = $this->db->prepare('SELECT * FROM moves WHERE game_id = ? ORDER BY id DESC LIMIT 1');
+        $stmt->bind_param('i', $_SESSION['game_id']);
         $stmt->execute();
-        $result = $stmt->get_result()->fetch_array();
-
-        if (!$result) {
-            $_SESSION['error'] = 'result empty';
-            return;
-        } else {
-            // haal de vorige move uit de database
+        $result = $stmt->get_result();
+    
+        if ($row = $result->fetch_assoc()) {
+            // Set the game state to the state before the last move
+            $state = unserialize($row['state']);
+            list($hand, $board, $player) = $state;
+    
+            // Update the game state in the session
+            $_SESSION['hand'] = $hand;
+            $_SESSION['board'] = $board;
+            $_SESSION['player'] = $player;
+            $_SESSION['last_move'] = $row['previous_id'];
+    
+            // Delete the last move from the database as it is being undone
             $stmt = $this->db->prepare('DELETE FROM moves WHERE id = ?');
-            $stmt->bind_param('i', $_SESSION['last_move']);
+            $stmt->bind_param('i', $row['id']);
             $stmt->execute();
-
-            $_SESSION['last_move'] = $result['previous_id'];
-        }
-
-        // check of je wel een move hebt om terug te gaan
-        if ($result['prevous_id' == null]) {
-            $_SESSION['error'] = 'No moves to undo';
-            return;
         } else {
-            // haal de vorige state op
-            $stmt = $this->db->prepare('select state from moves where id = ?');
-            $stmt->bind_param('i', $_SESSION['last_move']);
-            $stmt->execute();
-            $result = $stmt->get_result()->fetch_array();
-            $this->db->set_state($result['state']);
+            $_SESSION['error'] = "No moves to undo";
         }
+    }
+    
 
-        
-        // if ($_SESSION['last_move'] == 0) {
-        //     $_SESSION['error'] = 'No moves to undo';
-        //     return;
-        // }
+    function checkifPlayerplayedQueen($player) {
+        $hand = $_SESSION['hand'][$player];
+        if ($hand['Q'] == 0) {
+            return true;
+        }
+        return false;
+    }
 
-        // // haal de laatste move op en zet de state terug
-
-        
-        // // zet de state terug
-        
-        // $this->db->set_state($result[6]);
-
-        
-
-        // $_SESSION['player'] = 1 - $_SESSION['player'];
-        
+    public function insertPlay($piece, $to) {
+        $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "play", ?, ?, ?, ?)');
+        $state = $this->db->get_state();
+        $stmt->bind_param('issis', $_SESSION['game_id'], $piece, $to, $_SESSION['last_move'], $state);
+        $stmt->execute();
+        $_SESSION['last_move'] = $this->db->insert_id();
     }
 
     public function play($piece, $to) {
@@ -198,8 +177,19 @@ class Game {
             $_SESSION['error'] = "Player does not have tile";
         elseif (isset($board[$to]))
             $_SESSION['error'] = 'Board position is not empty';
-        elseif (array_sum($hand) == 8 && $piece != 'Q') #bug fix 3
-            $_SESSION['error'] = 'Must play queen bee by the fourth move'; #bug fix 3
+        
+        // Must play queen bee by the fourth move bug fix
+        elseif (array_sum($hand) == 8 && $hand['Q']) {
+            if ($piece != 'Q') {
+                $_SESSION['error'] = 'Must play queen bee by the fourth move'; #bug fix 3
+            } else {
+                $_SESSION['board'][$to] = [[$_SESSION['player'], $piece]];
+                $_SESSION['hand'][$player][$piece]--;
+                $_SESSION['player'] = 1 - $_SESSION['player'];
+                $this->insertPlay($piece, $to);
+            }
+        }
+           
         elseif (count($board) && !$this->gameLogic->hasNeighBour($to, $board))
             $_SESSION['error'] = "board position has no neighbour";
         elseif (array_sum($hand) < 11 && !$this->gameLogic->neighboursAreSameColor($player, $to, $board))
@@ -210,11 +200,7 @@ class Game {
             $_SESSION['board'][$to] = [[$_SESSION['player'], $piece]];
             $_SESSION['hand'][$player][$piece]--;
             $_SESSION['player'] = 1 - $_SESSION['player'];
-            $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "play", ?, ?, ?, ?)');
-            $state = $this->db->get_state();
-            $stmt->bind_param('issis', $_SESSION['game_id'], $piece, $to, $_SESSION['last_move'], $state);
-            $stmt->execute();
-            $_SESSION['last_move'] = $this->db->insert_id();
+            $this->insertPlay($piece, $to);
         }
     }
 
@@ -231,7 +217,7 @@ class Game {
         elseif ($hand['Q'])
             $_SESSION['error'] = "Queen bee is not played";
         else {
-            // doe een move code.
+            // Do a move code
             $tile = array_pop($board[$from]);
             if (!$this->gameLogic->hasNeighBour($to, $board))
                 $_SESSION['error'] = "Move would split hive";

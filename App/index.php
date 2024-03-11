@@ -56,22 +56,20 @@ if (!count($moveto)) $moveto[] = '0,0';
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?">
     </head>
 <body>
-    <div class="board">
-        <?php $gameRenderer->renderBoard($board); ?>
-    </div>
-    <hr>
+        <div class="board">
+            <?php $gameRenderer->renderGhostTiles($board, $gameLogic->getOffsets()) ?>
+            <?php $gameRenderer->renderBoard($board); ?>
+        </div>
     <div class="hand">White:
         <?php 
             $gameRenderer->renderHand($hand, 0); 
         ?>
     </div>
-    <hr>
     <div class="hand">Black: 
         <?php 
             $gameRenderer->renderHand($hand, 1); 
         ?>
     </div>
-    <hr>
     <div class="turn">Turn: 
         <?php 
             $gameRenderer->displayTurn($player); 
@@ -94,12 +92,12 @@ if (!count($moveto)) $moveto[] = '0,0';
         </form>
         
         <form method="post" action="index.php">
-            <select name="from">
+            <select name="from" id="from">
                 <?php
                     $gameRenderer->displayFrom($board, $player);
                 ?>
             </select>
-            <select name="to">
+            <select name="to" id="fromTo">
                 <?php
                     foreach ($moveto as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
@@ -108,27 +106,74 @@ if (!count($moveto)) $moveto[] = '0,0';
             </select>
             <input type="submit" value="Move">
         </form>
-        <form method="post" action="index.php">
-            <input type="hidden" name="pass" value="true">
-            <input type="submit" value="Pass">
-        </form>
-        <form method="post" action="index.php">
-            <input type="hidden" name="restart" value="true">
-            <input type="submit" value="Restart">
-        </form>
-        <strong>
-            <?php
-                $gameRenderer->displayError();
-            ?>
-        </strong>
-        <ol>
-            <?php
-                $game->game();
-            ?>
-        </ol>
-        <form method="post" action="index.php">
-            <input type="hidden" name="undo" value="true">
-            <input type="submit" value="Undo">
-        </form>
+        <?php
+            $gameRenderer->displayError();
+        ?>
+        <hr>
+        <div class="actionButtons">
+            <form method="post" action="index.php">
+                <input type="hidden" name="pass" value="true">
+                <input type="submit" value="Pass">
+            </form>
+            <form method="post" action="index.php">
+                <input type="hidden" name="restart" value="true">
+                <input type="submit" value="Restart">
+            </form>
+            <form method="post" action="index.php">
+                <input type="hidden" name="undo" value="true">
+                <input type="submit" value="Undo">
+            </form>
+        </div>
+        <div class="log">
+            <code>
+                <ol>
+                    <?php
+                        $gameRenderer->displayLog($db);
+                    ?>
+                </ol>
+            </code>
+        </div>
     </body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromSelect = document.querySelector('#from');
+            const fromtoSelect = document.querySelector('#fromTo');
+            const tiles = document.querySelectorAll('.tile');
+
+            fromSelect.addEventListener('change', function() {
+                // Remove existing highlights
+                tiles.forEach(tile => {
+                    if (tile.style.border === '2px solid red') {
+                        tile.style.border = '';
+                    }
+                });
+
+                // Highlight the selected tile
+                const selectedPosition = this.value;
+                const selectedTile = document.querySelector(`.tile[data-position="${selectedPosition}"]`);
+                if (selectedTile) {
+                    selectedTile.style.border = '2px solid red';
+                }
+            });
+            for (let i = 0; i < tiles.length; i++) {
+                // only for non ghost tiles 
+                if (tiles[i].dataset.position !== undefined) {
+                    tiles[i].addEventListener('click', function() {
+                        const selectedPosition = this.dataset.position;
+                        fromSelect.value = selectedPosition;
+
+                        // Remove existing highlights
+                        tiles.forEach(tile => {
+                            if (tile.style.border === '2px solid red') {
+                                tile.style.border = '';
+                            }
+                        });
+
+                        // Highlight the selected tile
+                        this.style.border = '2px solid red';
+                    });
+                }
+            };
+        });
+    </script>
 </html>
