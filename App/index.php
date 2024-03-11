@@ -1,71 +1,51 @@
 <?php
+namespace Colin\Hive;
 session_start();
-include_once 'util.php';
-include_once 'renderer.php';
+
+require 'vendor/autoload.php';
+use Colin\Hive\Database;
+use Colin\Hive\Game;
+use Colin\Hive\GameLogic;
+use Colin\Hive\GameRenderer;
+
+$host = getenv('MYSQL_HOST') ?: 'localhost';
+$user = getenv('MYSQL_USER') ?: 'root';
+$password = getenv('MYSQL_PASSWORD') ?: '';
+$database = getenv('MYSQL_DB') ?: 'hive';
+
+$db = new Database($host, $user, $password, $database);
+$gameLogic = new GameLogic();
+$game = new Game($db, $gameLogic);
+$gameRenderer = new GameRenderer();
 
 if (!isset($_SESSION['board'])) {
-    header('Location: restart.php');
-    exit(0);
+    $game->restart();
 }
 
-$board = $_SESSION['board'];
-$player = $_SESSION['player'];
-$hand = $_SESSION['hand'];
+$game->startInitGame();
 
-function calculatePositions($board, $offsets, $player) {
-    // bug fix #1
-    $validPositions = [];
+$game->handlePostRequests();
 
-    if (count($board) == 1 && isset($board['0,0'])) {
-        foreach ($offsets as $offset) {
-            $newPos = $offset[0] . ',' . $offset[1];
-            if (!array_key_exists($newPos, $board)) {
-                $validPositions[] = $newPos;
-            }
-        }
-    } else {
-        // For moves after the second, calculate valid positions based on existing logic
-        foreach (array_keys($board) as $pos) {
-            list($p, $q) = explode(',', $pos);
-            foreach ($offsets as $offset) {
-                $newPos = ($p + $offset[0]) . ',' . ($q + $offset[1]);
-                if (!array_key_exists($newPos, $board) && isValidPosition($newPos, $board, $player)) {
-                    $validPositions[] = $newPos;
-                }
-            }
-        }
-    }
 
-    return array_unique($validPositions);
-}
 
+$board = $game->getBoard();
+$player = $game->getPlayer();
+$hand = $game->getHand();
 
 // Bug fix 1
-$to = calculatePositions($board, $GLOBALS['OFFSETS'], $player);
-if (empty($to)) $to[] = '0,0';
+$to = $gameLogic->calculatePositions($board, $gameLogic->getOffsets(), $player);
+
 
 $moveto = [];
-foreach ($GLOBALS['OFFSETS'] as $pq) {
+foreach ($gameLogic->getOffsets() as $pq) {
     foreach (array_keys($board) as $pos) {
         $pq2 = explode(',', $pos);
-        // echo ($pq[0] + $pq2[0]) . ',' . ($pq[1] + $pq2[1]);
         $moveto[] = ($pq[0] + $pq2[0]) . ',' . ($pq[1] + $pq2[1]);
     }
 }
 
 $moveto = array_unique($moveto);
 if (!count($moveto)) $moveto[] = '0,0';
-
-function game() {
-    $db = include 'database.php';
-    $stmt = $db->prepare('SELECT * FROM moves WHERE game_id = ?');
-    $stmt->bind_param('i', $_SESSION['game_id']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_array()) {
-        echo '<li>'.htmlspecialchars($row[2]).' '.htmlspecialchars($row[3]).' '.htmlspecialchars($row[4]).'</li>';
-    }
-}
 
 ?>
 <!DOCTYPE html>
@@ -76,31 +56,29 @@ function game() {
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?">
     </head>
 <body>
-    <div class="board">
-        <?php renderBoard($board); ?>
-    </div>
-    <hr>
+        <div class="board">
+            <?php $gameRenderer->renderGhostTiles($board, $gameLogic->getOffsets()) ?>
+            <?php $gameRenderer->renderBoard($board); ?>
+        </div>
     <div class="hand">White:
         <?php 
-            renderHand($hand, 0); 
+            $gameRenderer->renderHand($hand, 0); 
         ?>
     </div>
-    <hr>
     <div class="hand">Black: 
         <?php 
-            renderHand($hand, 1); 
+            $gameRenderer->renderHand($hand, 1); 
         ?>
     </div>
-    <hr>
     <div class="turn">Turn: 
         <?php 
-            displayTurn($player); 
+            $gameRenderer->displayTurn($player); 
         ?>
     </div>
-        <form method="post" action="play.php">
+        <form method="post" action="index.php" name="GameAction">
             <select name="piece">
                 <?php
-                    displayPiece($hand, $player);
+                    $gameRenderer->displayPiece($hand, $player);
                 ?>
             </select>
             <select name="to">
@@ -112,13 +90,14 @@ function game() {
             </select>
             <input type="submit" value="Play">
         </form>
-        <form method="post" action="move.php">
-            <select name="from">
+        
+        <form method="post" action="index.php">
+            <select name="from" id="from">
                 <?php
-                    displayFrom($board, $player);
+                    $gameRenderer->displayFrom($board, $player);
                 ?>
             </select>
-            <select name="to">
+            <select name="to" id="fromTo">
                 <?php
                     foreach ($moveto as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
@@ -127,25 +106,74 @@ function game() {
             </select>
             <input type="submit" value="Move">
         </form>
-        <form method="post" action="pass.php">
-            <input type="submit" value="Pass">
-        </form>
-        <form method="post" action="restart.php">
-            <input type="submit" value="Restart">
-        </form>
-        <strong>
-            <?php
-                displayError()
-            ?>
-        </strong>
-        <ol>
-            <?php
-                game();
-            ?>
-        </ol>
-        <form method="post" action="undo.php">
-            <input type="submit" value="Undo">
-        </form>
+        <?php
+            $gameRenderer->displayError();
+        ?>
+        <hr>
+        <div class="actionButtons">
+            <form method="post" action="index.php">
+                <input type="hidden" name="pass" value="true">
+                <input type="submit" value="Pass">
+            </form>
+            <form method="post" action="index.php">
+                <input type="hidden" name="restart" value="true">
+                <input type="submit" value="Restart">
+            </form>
+            <form method="post" action="index.php">
+                <input type="hidden" name="undo" value="true">
+                <input type="submit" value="Undo">
+            </form>
+        </div>
+        <div class="log">
+            <code>
+                <ol>
+                    <?php
+                        $gameRenderer->displayLog($db);
+                    ?>
+                </ol>
+            </code>
+        </div>
     </body>
-</html>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromSelect = document.querySelector('#from');
+            const fromtoSelect = document.querySelector('#fromTo');
+            const tiles = document.querySelectorAll('.tile');
 
+            fromSelect.addEventListener('change', function() {
+                // Remove existing highlights
+                tiles.forEach(tile => {
+                    if (tile.style.border === '2px solid red') {
+                        tile.style.border = '';
+                    }
+                });
+
+                // Highlight the selected tile
+                const selectedPosition = this.value;
+                const selectedTile = document.querySelector(`.tile[data-position="${selectedPosition}"]`);
+                if (selectedTile) {
+                    selectedTile.style.border = '2px solid red';
+                }
+            });
+            for (let i = 0; i < tiles.length; i++) {
+                // only for non ghost tiles 
+                if (tiles[i].dataset.position !== undefined) {
+                    tiles[i].addEventListener('click', function() {
+                        const selectedPosition = this.dataset.position;
+                        fromSelect.value = selectedPosition;
+
+                        // Remove existing highlights
+                        tiles.forEach(tile => {
+                            if (tile.style.border === '2px solid red') {
+                                tile.style.border = '';
+                            }
+                        });
+
+                        // Highlight the selected tile
+                        this.style.border = '2px solid red';
+                    });
+                }
+            };
+        });
+    </script>
+</html>

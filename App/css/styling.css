@@ -1,19 +1,39 @@
 body {
     font-family: "Open Sans", sans-serif;
+    background-color: #eaeaea; /* Soft background color */
+    color: #333; /* Primary text color */
+    line-height: 1.6; /* Spacing between lines of text */
 }
+
 div.board {
     width: 60%;
     height: 100%;
-    min-height: 600px;
+    min-height: 700px;
     float: left;
     overflow: auto;
     position: relative;
     background: #f5f5f5; 
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    margin-right: 20px;
 }
 
 div.board div.tile {
     position: absolute;
 }
+
+div.hand {
+    background: #f8f8f8;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    margin: 10px 0;
+    display: inline-block;
+}
+
+
 
 div.tile {
     display: inline-block;
@@ -24,14 +44,13 @@ div.tile {
     font-size: 0.8em;
     padding: 5px;
     border-radius: 8px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
 }
 
 div.tile span {
     display: block;
     width: 100%;
     text-align: center;
-    font-size: 2em;
+    font-size: 0.8em;
 }
 
 div.player0 {
@@ -48,4 +67,69 @@ div.stacked {
     border-width: 4px;
     border-color: #ff4500;
     padding: 1px;
+}
+
+div.tile.ghost {
+    border: 1px dashed #999;
+    color: #999;
+    background: transparent;
+    width: 3.5em;
+    height: 3.5em;
+    box-shadow: none;
+    margin-left: 0.25em;
+    margin-top: 0.25em;
+    transition: all 0s ease-in-out;
+}
+
+div.tile:not(.ghost):hover {
+    transform: scale(1.10);
+    z-index: 10;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+img.tileImage {
+    display: block; 
+    width: 25px; 
+    height: 25px; 
+    margin: auto; 
+    position: absolute; 
+    top: 60%; 
+    transform: translateY(-50%); 
+    left: 0; 
+    right: 0;
+}
+
+div.log {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+    font-family: "Courier New", monospace;
+    font-size: 0.9em;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+div.log ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+div.actionButtons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+
+div.turn {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 10px 0;
 }
