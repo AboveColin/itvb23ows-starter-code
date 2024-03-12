@@ -26,8 +26,6 @@ $game->startInitGame();
 
 $game->handlePostRequests();
 
-
-
 $board = $game->getBoard();
 $player = $game->getPlayer();
 $hand = $game->getHand();

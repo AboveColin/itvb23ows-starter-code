@@ -101,4 +101,6 @@ class GameLogic {
     
         return array_unique($validPositions);
     }
+
+    
 }

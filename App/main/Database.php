@@ -26,8 +26,8 @@ class Database {
         $_SESSION['player'] = $player;
     }
     
-    public function __construct($host, $user, $password, $database) {
-        $this->connection = new mysqli($host, $user, $password, $database);
+    public function __construct($host, $user, $password, $database, $port = 3306) {
+        $this->connection = new mysqli($host, $user, $password, $database, $port);
 
         if ($this->connection->connect_error) {
             die("Connection failed: " . $this->connection->connect_error);

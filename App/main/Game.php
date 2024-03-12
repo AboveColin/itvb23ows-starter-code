@@ -129,6 +129,11 @@ class Game {
         $stmt->bind_param('i', $_SESSION['game_id']);
         $stmt->execute();
         $result = $stmt->get_result();
+
+        if ($result->num_rows == 0) {
+            $_SESSION['error'] = "No moves to undo";
+            return;
+        }
     
         if ($row = $result->fetch_assoc()) {
             // Set the game state to the state before the last move
@@ -145,8 +150,6 @@ class Game {
             $stmt = $this->db->prepare('DELETE FROM moves WHERE id = ?');
             $stmt->bind_param('i', $row['id']);
             $stmt->execute();
-        } else {
-            $_SESSION['error'] = "No moves to undo";
         }
     }
     

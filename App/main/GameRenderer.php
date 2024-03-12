@@ -1,7 +1,6 @@
 <?php
 namespace Colin\Hive;
 
-
 class GameRenderer
 {
     function displayTile($tile, $pos, $min_p, $min_q, $playerClass) {
