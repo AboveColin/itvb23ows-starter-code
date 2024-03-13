@@ -133,3 +133,9 @@ div.turn {
     font-weight: bold;
     margin: 10px 0;
 }
+
+div.tile.ant {
+    background-color: #ff4500;
+    color: #fff;
+
+}

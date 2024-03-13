@@ -2,8 +2,6 @@
 
 namespace Colin\Hive;
 
-
-
 class GameLogic {
     private $offsets;
 
@@ -64,12 +62,54 @@ class GameLogic {
     
         return min($lenCommon0, $lenCommon1) <= max($lenFrom, $lenTo);
     }
-    
+
     function isValidPosition($position, $board, $player) {
         if ($this->hasNeighBour($position, $board) && $this->neighboursAreSameColor($player, $position, $board)) {
             return true;
         }
         return false;
+    }
+
+    public function isHiveConnected($board) {
+        if (count($board) <= 1) {
+            // The hive is connected if there's only one tile in the board.
+            return true;
+        }
+    
+        $visited = [];
+        $start = array_key_first($board); // Starting from the first tile in the board.
+        $this->dfs($start, $board, $visited); // Depth-first search to visit all connected tiles.
+    
+        // If the number of visited nodes equals the number of tiles in the board, the hive is connected.
+        return count($visited) === count($board);
+    }
+
+    private function dfs($pos, $board, &$visited) {
+        // Depth-first search to visit all connected tiles.
+        if (array_key_exists($pos, $visited)) {
+            // Already visited this position.
+            return;
+        }
+
+        $visited[$pos] = true; // Mark as visited.
+
+        // Recursively visit all neighbors.
+        $neighbors = $this->getNeighbors($pos);
+        foreach ($neighbors as $neighbor) {
+            if (isset($board[$neighbor]) && !isset($visited[$neighbor])) {
+                $this->dfs($neighbor, $board, $visited);
+            }
+        }
+    }
+
+    private function getNeighbors($pos) {
+        $offsets = $this->getOffsets();
+        list($x, $y) = explode(',', $pos);
+        $neighbors = [];
+        foreach ($offsets as $offset) {
+            $neighbors[] = ($x + $offset[0]) . ',' . ($y + $offset[1]);
+        }
+        return $neighbors;
     }
 
 
@@ -151,12 +191,38 @@ class GameLogic {
                 //Een sprinkhaan mag niet naar een bezet veld springen.
             }
         }
-        return false;
     }
 
+    public function calculateAntMoves($from, $board, $player) {
+        $validMoves = [];
+        $visited = [$from => true];
+        $queue = new \SplQueue();
+        $queue->enqueue($from);
     
-
+        while (!$queue->isEmpty()) {
+            $currentPosition = $queue->dequeue();
+            foreach ($this->getOffsets() as $offset) {
+                $newPos = (explode(',', $currentPosition)[0] + $offset[0]) . ',' . (explode(',', $currentPosition)[1] + $offset[1]);
+                
+                if (!isset($board[$newPos]) && // Check if the new position is empty
+                    !isset($visited[$newPos]) && // Check if the position hasn't been visited
+                    $this->slide($board, $currentPosition, $newPos)) { // Check if a slide to the new position is valid
+                    
+                    // Temporarily simulate the ant's move to ensure the hive remains connected
+                    $tempBoard = $board;
+                    unset($tempBoard[$from]);
+                    $tempBoard[$newPos] = [[$player, 'A']]; // Simulate moving the ant to the new position
+                    
+                    if ($this->isHiveConnected($tempBoard)) { // Ensure the hive remains connected after the simulated move
+                        $validMoves[] = $newPos;
+                        $visited[$newPos] = true;
+                        $queue->enqueue($newPos);
+                    }
+                }
+            }
+        }
     
-
+        return $validMoves;
+    }
     
 }

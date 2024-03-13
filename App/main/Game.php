@@ -222,48 +222,6 @@ class Game {
         $_SESSION['last_move'] = $this->db->insert_id();
     }
 
-    public function isHiveConnected($board) {
-        if (count($board) <= 1) {
-            // The hive is connected if there's only one tile in the board.
-            return true;
-        }
-    
-        $visited = [];
-        $start = array_key_first($board); // Starting from the first tile in the board.
-        $this->dfs($start, $board, $visited); // Depth-first search to visit all connected tiles.
-    
-        // If the number of visited nodes equals the number of tiles in the board, the hive is connected.
-        return count($visited) === count($board);
-    }
-
-    private function dfs($pos, $board, &$visited) {
-        // Depth-first search to visit all connected tiles.
-        if (array_key_exists($pos, $visited)) {
-            // Already visited this position.
-            return;
-        }
-
-        $visited[$pos] = true; // Mark as visited.
-
-        // Recursively visit all neighbors.
-        $neighbors = $this->getNeighbors($pos);
-        foreach ($neighbors as $neighbor) {
-            if (isset($board[$neighbor]) && !isset($visited[$neighbor])) {
-                $this->dfs($neighbor, $board, $visited);
-            }
-        }
-    }
-
-    private function getNeighbors($pos) {
-        // use offsets from Gamelogic
-        $offsets = $this->gameLogic->getOffsets();
-        list($x, $y) = explode(',', $pos);
-        $neighbors = [];
-        foreach ($offsets as $offset) {
-            $neighbors[] = ($x + $offset[0]) . ',' . ($y + $offset[1]);
-        }
-        return $neighbors;
-    }
 
     
     public function move($from, $to) {
@@ -301,6 +259,12 @@ class Game {
             return;
         }
 
+        if ($tile[1] === "A" && !$this->gameLogic->calculateAntMoves($from, $to, $board)) {
+            $_SESSION['error'] = "Invalid ant move";
+            $board[$from][] = $tile; // Return the tile to its original position
+            return;
+        }
+
         // hive connected validation
         // simulate the move and check if it's valid
         $tempBoard = $board; // Create a copy of the current board state
@@ -308,7 +272,7 @@ class Game {
         $tempBoard[$to] = [$tile]; // Simulate the tile's new position
 
         // Now check if the hive is connected after the simulated move
-        if (!$this->isHiveConnected($tempBoard)) {
+        if (!$this->gameLogic->isHiveConnected($tempBoard)) {
             $_SESSION['error'] = "Move would split hive";
         }
 
