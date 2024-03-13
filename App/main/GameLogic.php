@@ -332,5 +332,34 @@ class GameLogic {
 
         return false; // No valid moves found
     }
+
+    // Win check functions
+    public function isQueenSurrounded($board, $player) {
+        foreach ($board as $pos => $tiles) {
+            foreach ($tiles as $tile) {
+                if ($tile[1] == 'Q' && $tile[0] == $player) {
+                    return $this->areAllNeighborsOccupied($pos, $board);
+                }
+            }
+        }
+        return false;
+    }
+
+    private function areAllNeighborsOccupied($pos, $board) {
+        $neighbors = $this->getNeighbors($pos);
+        foreach ($neighbors as $neighbor) {
+            if (!isset($board[$neighbor])) {
+                return false; // Found an unoccupied neighbor
+            }
+        }
+        return true; // All neighbors are occupied
+    }
+
+    public function isDraw($board) {
+        $whiteQueenSurrounded = $this->isQueenSurrounded($board, 0);
+        $blackQueenSurrounded = $this->isQueenSurrounded($board, 1);
+
+        return $whiteQueenSurrounded && $blackQueenSurrounded;
+    }
     
 }

@@ -188,4 +188,23 @@ class GameRenderer
             $this->displaySpiderTile($p, $q, $min_p, $min_q);
         }
     }
+
+    public function renderOutcome() {
+        if (isset($_SESSION['game_over']) && $_SESSION['game_over']) {
+            $message = "";
+            $messageClass = "outcome";
+            
+            if ($_SESSION['winner'] === 'draw') {
+                $message = "The game ended in a draw.";
+                $messageClass .= " draw"; // Class for draw-specific styling
+            } else {
+                $winnerColor = $_SESSION['winner'] == 0 ? "White" : "Black";
+                $message = "Game over. {$winnerColor} wins!";
+                $messageClass .= " win"; // Class for win-specific styling
+            }
+            
+            echo "<div class=\"{$messageClass}\">{$message}</div>";
+        }
+    }
+    
 }

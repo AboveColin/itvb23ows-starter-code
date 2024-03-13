@@ -53,6 +53,7 @@ if (!count($moveto)) $moveto[] = '0,0';
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?">
     </head>
 <body>
+    <?php $gameRenderer->renderOutcome(); ?>
         <div class="board">
             <?php $gameRenderer->renderGhostTiles($board, $gameLogic->getOffsets()) ?>
             <?php $gameRenderer->renderBoard($board); ?>

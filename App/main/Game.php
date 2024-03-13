@@ -107,6 +107,9 @@ class Game {
         $_SESSION['board'] = [];
         $_SESSION['hand'] = [0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3], 1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]];
         $_SESSION['player'] = 0;
+        $_SESSION['game_over'] = false;
+        $_SESSION['winner'] = null;
+
 
         $this->db->prepare('INSERT INTO games VALUES ()')->execute();
         $_SESSION['game_id'] = $this->db->insert_id();
@@ -214,6 +217,7 @@ class Game {
             $_SESSION['hand'][$player][$piece]--;
             $_SESSION['player'] = 1 - $_SESSION['player'];
             $this->insertPlay($piece, $to);
+            $this->checkGameEnd();
         }
     }
 
@@ -308,6 +312,7 @@ class Game {
             $board[$to] = isset($board[$to]) ? array_merge($board[$to], [$tile]) : [$tile];
             $_SESSION['player'] = 1 - $_SESSION['player'];
             $this->insertMove($from, $to, $tile);
+            $this->checkGameEnd();
         }
         
         if (empty($board[$from])) {
@@ -320,6 +325,29 @@ class Game {
             // If there's an error, revert the tile to its original position
             $board[$from][] = $tile;
         }
+    }
+
+    public function checkGameEnd() {
+        if ($this->gameLogic->isDraw($this->board)) {
+            $_SESSION['game_over'] = true;
+            $_SESSION['winner'] = 'draw';
+            return;
+        }
+
+        if ($this->gameLogic->isQueenSurrounded($this->board, 0)) { // Check if the white queen is surrounded
+            $_SESSION['game_over'] = true;
+            $_SESSION['winner'] = 1; // Black wins
+            return;
+        }
+
+        if ($this->gameLogic->isQueenSurrounded($this->board, 1)) { // Check if the black queen is surrounded
+            $_SESSION['game_over'] = true;
+            $_SESSION['winner'] = 0; // White wins
+            return;
+        }
+
+        // No conditions met, the game continues
+        $_SESSION['game_over'] = false;
     }
 
     

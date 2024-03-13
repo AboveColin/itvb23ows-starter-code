@@ -136,6 +136,23 @@ div.turn {
 
 div.tile.move {
     background-color: #99b0f0;
-    color: #fff;
-    
+    color: #fff;   
+}
+
+.outcome {
+    padding: 10px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 1.2em;
+    border-radius: 5px;
+}
+
+.outcome.draw {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.outcome.win {
+    background-color: #5cb85c;
+    color: white;
 }
