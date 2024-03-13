@@ -89,4 +89,9 @@ class Testbug5 extends TestCase {
         $this->assertEquals([[0, 'Q']], $_SESSION['board']['0,0'], "Position 0,0 should now have the white queen");
     }
 
+    protected function tearDown(): void
+    {
+        session_unset();
+    }
+
 }

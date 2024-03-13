@@ -114,6 +114,13 @@ class Game {
 
     
     public function pass() {
+        // Before allowing the pass, check if the player has any valid moves
+        if ($this->gameLogic->hasValidMoves($this->board, $this->hand, $this->player)) {
+            $_SESSION['error'] = "Cannot pass, valid moves are available.";
+            return;
+        }
+
+        // Continue with the pass logic if no valid moves are available
         $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "pass", null, null, ?, ?)');
         $state = $this->db->get_state();
         $stmt->bind_param('iis', $_SESSION['game_id'], $_SESSION['last_move'], $state);

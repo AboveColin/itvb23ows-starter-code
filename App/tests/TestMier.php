@@ -67,6 +67,11 @@ class TestMier extends TestCase
         $this->assertContains('2,0', $validPositions);
         $this->assertNotContains('0,1', $validPositions);
     }
+    
+    protected function tearDown(): void
+    {
+        session_unset();
+    }
 }
 
 

@@ -75,11 +75,16 @@ class TestSpin extends TestCase {
         /*
             Test that the spider cannot move if completely blocked by other tiles
         */
-        
+
         $board = [
             // Set up a board configuration where the spider is completely surrounded by other tiles
         ];
         $spiderMoves = $this->gameLogic->calculateSpiderMoves('0,0', $board, 0);
         $this->assertCount(0, $spiderMoves, "Spider should not have any moves if completely blocked.");
+    }
+
+    protected function tearDown(): void
+    {
+        session_unset();
     }
 }

@@ -194,6 +194,19 @@ class GameLogic {
         return false;
     }
 
+    public function calculateGrasshopperMoves($from, $board, $player) {
+        $validMoves = [];
+        foreach (array_keys($board) as $pos) {
+            for ($i = 0; $i < 6; $i++) {
+                $newPos = (explode(',', $pos)[0] + $this->getOffsets()[$i][0]) . ',' . (explode(',', $pos)[1] + $this->getOffsets()[$i][1]);
+                if ($this->isValidGrasshopperMove($from, $newPos, $board)) {
+                    $validMoves[] = $newPos;
+                }
+            }
+        }
+        return array_unique($validMoves); // Remove duplicates
+    }
+
     public function calculateAntMoves($from, $board, $player) {
         $validMoves = [];
         $visited = [$from => true];
@@ -283,6 +296,41 @@ class GameLogic {
             }
         }
         return false;
+    }
+
+    public function hasValidMoves($board, $hand, $player) {
+
+        foreach (array_keys($hand[$player]) as $tile) {
+            if ($hand[$player][$tile] > 0) {
+                foreach (array_keys($board) as $pos) {
+                    if ($board[$pos][count($board[$pos]) - 1][0] == $player) {
+                        if ($tile == 'A') {
+                            $calculatedMoves = $this->calculateAntMoves($pos, $board, $player);
+                            if (!empty($calculatedMoves)) {
+                                return true;
+                            }
+                        } elseif ($tile == 'S') {
+                            $calculatedMoves = $this->calculateSpiderMoves($pos, $board, $player);
+                            if (!empty($calculatedMoves)) {
+                                return true;
+                            }
+                        } elseif ($tile == 'G') {
+                            $calculatedMoves = $this->calculateGrasshopperMoves($pos, $board, $player);
+                            if (!empty($calculatedMoves)) {
+                                return true;
+                            }
+                        } else {
+                            $calculatedMoves = $this->calculatePositions($board, $this->getOffsets(), $player);
+                            if (!empty($calculatedMoves)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false; // No valid moves found
     }
     
 }

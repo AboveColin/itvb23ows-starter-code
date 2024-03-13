@@ -61,4 +61,9 @@ class TestSprinkhaan extends TestCase
         $isValid = $this->gameLogic->isValidGrasshopperMove('0,0', '0,3', $board);
         $this->assertFalse($isValid);
     }
+
+    protected function tearDown(): void
+    {
+        session_unset();
+    }
 }
