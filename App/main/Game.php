@@ -150,6 +150,9 @@ class Game {
             $stmt = $this->db->prepare('DELETE FROM moves WHERE id = ?');
             $stmt->bind_param('i', $row['id']);
             $stmt->execute();
+
+            // set player to the previous player
+            $_SESSION['player'] = 1 - $_SESSION['player'];
         }
     }
     
@@ -207,68 +210,137 @@ class Game {
         }
     }
 
+    private function insertMove($from, $to, $tile) {
+        $gameId = $_SESSION['game_id'];
+        $previousId = $_SESSION['last_move'];
+        $state = $this->db->get_state();
+        
+        $query = 'INSERT INTO moves (game_id, type, move_from, move_to, previous_id, state) VALUES (?, "move", ?, ?, ?, ?)';
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param('issis', $gameId, $from, $to, $previousId, $state);
+        $stmt->execute();
+        $_SESSION['last_move'] = $this->db->insert_id();
+    }
+
+    public function isHiveConnected($board) {
+        if (count($board) <= 1) {
+            // The hive is connected if there's only one tile in the board.
+            return true;
+        }
+    
+        $visited = [];
+        $start = array_key_first($board); // Starting from the first tile in the board.
+        $this->dfs($start, $board, $visited); // Depth-first search to visit all connected tiles.
+    
+        // If the number of visited nodes equals the number of tiles in the board, the hive is connected.
+        return count($visited) === count($board);
+    }
+
+    private function dfs($pos, $board, &$visited) {
+        // Depth-first search to visit all connected tiles.
+        if (array_key_exists($pos, $visited)) {
+            // Already visited this position.
+            return;
+        }
+
+        $visited[$pos] = true; // Mark as visited.
+
+        // Recursively visit all neighbors.
+        $neighbors = $this->getNeighbors($pos);
+        foreach ($neighbors as $neighbor) {
+            if (isset($board[$neighbor]) && !isset($visited[$neighbor])) {
+                $this->dfs($neighbor, $board, $visited);
+            }
+        }
+    }
+
+    private function getNeighbors($pos) {
+        // use offsets from Gamelogic
+        $offsets = $this->gameLogic->getOffsets();
+        list($x, $y) = explode(',', $pos);
+        $neighbors = [];
+        foreach ($offsets as $offset) {
+            $neighbors[] = ($x + $offset[0]) . ',' . ($y + $offset[1]);
+        }
+        return $neighbors;
+    }
+
+    
     public function move($from, $to) {
         $player = $_SESSION['player'];
         $board = $_SESSION['board'];
         $hand = $_SESSION['hand'][$player];
+        
+        // Clear any previous error
         unset($_SESSION['error']);
         
-        if (!isset($board[$from]))
+        // Validations for the move
+        if (!isset($board[$from])) {
             $_SESSION['error'] = 'Board position is empty';
-        elseif ($board[$from][count($board[$from])-1][0] != $player)
+            return;
+        }
+        if ($board[$from][count($board[$from])-1][0] != $player) {
             $_SESSION['error'] = "Tile is not owned by player";
-        elseif ($hand['Q'])
+            return;
+        }
+        if ($hand['Q']) {
             $_SESSION['error'] = "Queen bee is not played";
-        else {
-            // Do a move code
-            $tile = array_pop($board[$from]);
-            if (!$this->gameLogic->hasNeighBour($to, $board))
-                $_SESSION['error'] = "Move would split hive";
-            else {
-                $all = array_keys($board);
-                $queue = [array_shift($all)];
-                while ($queue) {
-                    $next = explode(',', array_shift($queue));
-                    foreach ($this->gameLogic->getOffsets() as $pq) {
-                        list($p, $q) = $pq;
-                        $p += $next[0];
-                        $q += $next[1];
-                        if (in_array("$p,$q", $all)) {
-                            $queue[] = "$p,$q";
-                            $all = array_diff($all, ["$p,$q"]);
-                        }
-                    }
-                }
-                if ($all) {
-                    $_SESSION['error'] = "Move would split hive";
-                } else {
-                    if ($from == $to) $_SESSION['error'] = 'Tile must move';
-                    elseif (isset($board[$to]) && $tile[1] != "B") $_SESSION['error'] = 'Tile not empty';
-                    elseif ($tile[1] == "Q" || $tile[1] == "B") {
-                        if (!$this->gameLogic->slide($board, $from, $to))
-                            $_SESSION['error'] = 'Tile must slide';
-                    }
-                }
-            }
-            // bug fix 4
-            if (!isset($_SESSION['error'])) {
-                if (empty($board[$from])) { // Check of de from positie leeg is en fix hiermee de bug
-                    unset($board[$from]); 
-                }
-                if (isset($board[$to])) array_push($board[$to], $tile);
-                else $board[$to] = [$tile];
-                $_SESSION['player'] = 1 - $_SESSION['player'];
-                $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "move", ?, ?, ?, ?)');
-                $state = $this->db->get_state();
-                $stmt->bind_param('issis', $_SESSION['game_id'], $from, $to, $_SESSION['last_move'], $state);
-                $stmt->execute();
-                $_SESSION['last_move'] = $this->db->insert_id();
-            } else {
-                // als er wel een error is, zet de tile terug naar originele positie
-                if (isset($board[$from])) array_push($board[$from], $tile);
-                else $board[$from] = [$tile];
-            }
+            return;
+        }
+        
+        // Simulate the move and check if it's valid
+        $tile = array_pop($board[$from]);
+        $this->board[$to][] = $tile;
+
+        
+
+        // grasshopper move validation
+        if ($tile[1] === "G" && !$this->gameLogic->isValidGrasshopperMove($from, $to, $board)) {
+            $_SESSION['error'] = "Invalid grasshopper move";
+            $board[$from][] = $tile; // Return the tile to its original position
+            return;
+        }
+
+        // hive connected validation
+        // simulate the move and check if it's valid
+        $tempBoard = $board; // Create a copy of the current board state
+        unset($tempBoard[$from]); // Remove the tile from its original position
+        $tempBoard[$to] = [$tile]; // Simulate the tile's new position
+
+        // Now check if the hive is connected after the simulated move
+        if (!$this->isHiveConnected($tempBoard)) {
+            $_SESSION['error'] = "Move would split hive";
+        }
+
+        if (!$this->gameLogic->hasNeighbour($to, $board)) {
+            $_SESSION['error'] = "Move would split hive";
+            return;
+        }
+        
+        
+        // More validations and actual move
+        if ($from == $to) {
+            $_SESSION['error'] = 'Tile must move';
+        } elseif (isset($board[$to]) && $tile[1] != "B") {
+            $_SESSION['error'] = 'Tile not empty';
+        } elseif (in_array($tile[1], ["Q", "B"]) && !$this->gameLogic->slide($board, $from, $to)) {
+            $_SESSION['error'] = 'Tile must slide';
+        } else {
+            // Finalizing the move
+            $board[$to] = isset($board[$to]) ? array_merge($board[$to], [$tile]) : [$tile];
+            $_SESSION['player'] = 1 - $_SESSION['player'];
+            $this->insertMove($from, $to, $tile);
+        }
+        
+        if (empty($board[$from])) {
+            unset($board[$from]);
+        }
+
+        if (!isset($_SESSION['error'])) {
             $_SESSION['board'] = $board;
+        } else {
+            // If there's an error, revert the tile to its original position
+            $board[$from][] = $tile;
         }
     }
 

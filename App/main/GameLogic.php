@@ -72,6 +72,7 @@ class GameLogic {
         return false;
     }
 
+
     function calculatePositions($board, $offsets, $player) {
         // bug fix #1
         $validPositions = [];
@@ -101,6 +102,61 @@ class GameLogic {
     
         return array_unique($validPositions);
     }
+
+    private function gcd($a, $b) {
+        // functie om de rechte lijn te berekenen
+        return $b ? $this->gcd($b, $a % $b) : $a;
+    }
+
+    public function isValidGrasshopperMove($from, $to, $board) {
+        if ($from === $to) {
+            return false; // Een sprinkhaan mag zich niet verplaatsen naar het veld waar hij al staat.
+        }
+
+        $fromCoords = explode(',', $from);
+        $toCoords = explode(',', $to);
+        $direction = [$toCoords[0] - $fromCoords[0], $toCoords[1] - $fromCoords[1]];
+
+        // Check for straight line movement
+        $gcd = $this->gcd(abs($direction[0]), abs($direction[1]));
+        if ($gcd !== 0) {
+            $direction[0] /= $gcd;
+            $direction[1] /= $gcd;
+        }
+
+        $currentPosition = $fromCoords;
+        $hasJumped = false;
+        while (true) {
+            $currentPosition[0] += $direction[0];
+            $currentPosition[1] += $direction[1];
+            $currentPosKey = implode(',', $currentPosition);
+
+            if (!isset($board[$currentPosKey])) {
+                if ($hasJumped) { 
+                    // Een sprinkhaan mag niet over lege velden springen. Dit betekent dat alle
+                    // velden tussen de start- en eindpositie bezet moeten zijn. 
+                    return $currentPosKey === $to;
+                } else {
+                    //Een sprinkhaan moet over minimaal één steen springen. 
+                    return false;
+                }
+            } else {
+                $hasJumped = true; 
+                // Een sprinkhaan verplaatst zich door in een rechte lijn een sprong te maken 
+                // naar een veld meteen achter een andere steen in de richting van de sprong.
+            }
+
+            if ($currentPosKey === $to) {
+                return false; 
+                //Een sprinkhaan mag niet naar een bezet veld springen.
+            }
+        }
+        return false;
+    }
+
+    
+
+    
 
     
 }

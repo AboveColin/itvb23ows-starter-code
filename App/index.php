@@ -44,7 +44,6 @@ foreach ($gameLogic->getOffsets() as $pq) {
 
 $moveto = array_unique($moveto);
 if (!count($moveto)) $moveto[] = '0,0';
-
 ?>
 <!DOCTYPE html>
 <html>
