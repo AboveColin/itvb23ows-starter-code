@@ -250,8 +250,6 @@ class Game {
         $tile = array_pop($board[$from]);
         $this->board[$to][] = $tile;
 
-        
-
         // grasshopper move validation
         if ($tile[1] === "G" && !$this->gameLogic->isValidGrasshopperMove($from, $to, $board)) {
             $_SESSION['error'] = "Invalid grasshopper move";
@@ -259,8 +257,14 @@ class Game {
             return;
         }
 
-        if ($tile[1] === "A" && !$this->gameLogic->calculateAntMoves($from, $board, $player)) {
+        if ($tile[1] === "A" && !$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateAntMoves($from, $board, $player))) {
             $_SESSION['error'] = "Invalid ant move";
+            $board[$from][] = $tile; // Return the tile to its original position
+            return;
+        }
+
+        if ($tile[1] === "S" && !$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateSpiderMoves($from, $board, $player))) {
+            $_SESSION['error'] = "Invalid spider move";
             $board[$from][] = $tile; // Return the tile to its original position
             return;
         }
@@ -274,10 +278,13 @@ class Game {
         // Now check if the hive is connected after the simulated move
         if (!$this->gameLogic->isHiveConnected($tempBoard)) {
             $_SESSION['error'] = "Move would split hive";
+            $board[$from][] = $tile; // Return the tile to its original position
+            return;
         }
 
         if (!$this->gameLogic->hasNeighbour($to, $board)) {
             $_SESSION['error'] = "Move would split hive";
+            $board[$from][] = $tile; // Return the tile to its original position
             return;
         }
         

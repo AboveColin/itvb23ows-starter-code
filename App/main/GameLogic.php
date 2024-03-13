@@ -148,7 +148,7 @@ class GameLogic {
         return $b ? $this->gcd($b, $a % $b) : $a;
     }
 
-    public function isValidGrasshopperMove($from, $to, $board) {
+    public function isValidGrasshopperMove($from, $to, $board) : bool {
         if ($from === $to) {
             return false; // Een sprinkhaan mag zich niet verplaatsen naar het veld waar hij al staat.
         }
@@ -191,6 +191,7 @@ class GameLogic {
                 //Een sprinkhaan mag niet naar een bezet veld springen.
             }
         }
+        return false;
     }
 
     public function calculateAntMoves($from, $board, $player) {
@@ -223,6 +224,65 @@ class GameLogic {
         }
     
         return $validMoves;
+    }
+
+    public function checkIfMoveinCalculatedArray($to, $calculatedMoves) {
+        
+        foreach ($calculatedMoves as $move) {
+            if ($move === $to) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public function calculateSpiderMoves($from, $board, $player) {
+        $validMoves = [];
+        $visited = [];
+
+        if (count($board) == 1 && isset($board[$from])) {
+            // Als er alleen nog maar 1 spin is geplaatst en niets anders.
+            return $validMoves;
+        }
+
+        $this->dfsSpider($from, $board, $player, 0, $visited, $validMoves);
+        return array_unique($validMoves); // Remove duplicates
+    }
+
+    private function dfsSpider($currentPos, $board, $player, $depth, $visited, &$validMoves) {
+        if ($depth == 3) {
+            // max diepte van 3, dus geen zetten meer
+            if (!isset($board[$currentPos]) && $this->isAdjacentToAtLeastOneTile($currentPos, $board)) {
+                // check of de spin op een leeg veld staat en of het veld grenst aan minimaal 1 andere steen
+                $validMoves[] = $currentPos;
+            }
+            return;
+        }
+
+        $visited[$currentPos] = true; // Mark the current position as visited
+        
+        foreach ($this->getOffsets() as $offset) {
+            $newPos = (explode(',', $currentPos)[0] + $offset[0]) . ',' . (explode(',', $currentPos)[1] + $offset[1]);
+            if (!isset($visited[$newPos]) && $this->slide($board, $currentPos, $newPos) && $this->isAdjacentToAtLeastOneTile($newPos, $board)) {
+                // Recursief de mogelijke zetten van de spin berekenen
+                $this->dfsSpider($newPos, $board, $player, $depth + 1, $visited, $validMoves);
+            }
+        }
+
+        unset($visited[$currentPos]); // Unmark the current position for other paths
+    }
+
+    private function isAdjacentToAtLeastOneTile($pos, $board) {
+        // Check if the given position is adjacent to at least one existing tile on the board
+        foreach ($this->getOffsets() as $offset) {
+            $adjacentPos = (explode(',', $pos)[0] + $offset[0]) . ',' . (explode(',', $pos)[1] + $offset[1]);
+            if (isset($board[$adjacentPos])) {
+                // Found an adjacent tile
+                return true;
+            }
+        }
+        return false;
     }
     
 }

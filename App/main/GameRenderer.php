@@ -141,11 +141,10 @@ class GameRenderer
         $left = ($p - $min_p) * 4 + ($q - $min_q) * 2 + $centerOffsetX;
         $top = ($q - $min_q) * 4 + $centerOffsetY;
 
-        echo "<div class=\"tile ant\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)</div>";
+        echo "<div class=\"tile move\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)</div>";
     }
 
     public function renderAntMoves($board, $gameLogic) {
-        // show tiles that can be moved from the calculateAntMoves function in GameLogic
         $antMoves = $gameLogic->calculateAntMoves('0,0', $board, 0);
 
         $min_p = 1000;
@@ -161,6 +160,32 @@ class GameRenderer
             list($p, $q) = explode(',', $pos);
             $this->displayAntTile($p, $q, $min_p, $min_q);
         }
+    }
 
+    function displaySpiderTile($p, $q, $min_p, $min_q) {
+        $centerOffsetX = 15; // Horizontal center offset
+        $centerOffsetY = 15; // Vertical center offset
+        $left = ($p - $min_p) * 4 + ($q - $min_q) * 2 + $centerOffsetX;
+        $top = ($q - $min_q) * 4 + $centerOffsetY;
+
+        echo "<div class=\"tile move\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)</div>";
+    }
+
+    public function renderSpiderMoves($board, $gameLogic) {
+        $spiderMoves = $gameLogic->calculateSpiderMoves('-1,1', $board, 0);
+
+        $min_p = 1000;
+        $min_q = 1000;
+
+        foreach ($board as $pos => $tile) {
+            list($p, $q) = explode(',', $pos);
+            $min_p = min($p, $min_p);
+            $min_q = min($q, $min_q);
+        }
+
+        foreach ($spiderMoves as $pos) {
+            list($p, $q) = explode(',', $pos);
+            $this->displaySpiderTile($p, $q, $min_p, $min_q);
+        }
     }
 }

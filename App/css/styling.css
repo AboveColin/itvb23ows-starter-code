@@ -134,8 +134,8 @@ div.turn {
     margin: 10px 0;
 }
 
-div.tile.ant {
-    background-color: #ff4500;
+div.tile.move {
+    background-color: #99b0f0;
     color: #fff;
-
+    
 }
