@@ -259,7 +259,7 @@ class Game {
             return;
         }
 
-        if ($tile[1] === "A" && !$this->gameLogic->calculateAntMoves($from, $to, $board)) {
+        if ($tile[1] === "A" && !$this->gameLogic->calculateAntMoves($from, $board, $player)) {
             $_SESSION['error'] = "Invalid ant move";
             $board[$from][] = $tile; // Return the tile to its original position
             return;
