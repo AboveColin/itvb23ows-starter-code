@@ -17,9 +17,9 @@ pipeline {
 
         stage('SonarQube') {
           steps {
-            script { scannerHome = tool 'OWS-SQScanner' }
-            withSonarQubeEnv('OWS-SQScanner') {
-            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=squ_40a6b9a557f6734c20f094281b3200aa6845c469"
+            script { scannerHome = tool 'OWS' }
+            withSonarQubeEnv('OWS') {
+            sh '${scannerHome}/bin/sonar-scanner -D"sonar.projectKey=OWS" -D"sonar.sources=." -D"sonar.host.url=http://sonarqube:9000" -D"sonar.token=squ_37281e5b1fec23694973648bdff8718b5056ea68"'
             }
           }
         }
