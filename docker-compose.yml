@@ -61,7 +61,7 @@ services:
     
   sonarqube:
     build: ./SonarQube
-    image: sonarqube:8.9.0-community
+    image: sonarqube:latest
     ports:
       - "9000:9000"
     networks:
@@ -81,3 +81,7 @@ volumes:
   sonarqube_extensions:
   sonarqube_logs:
   sonarqube_temp:
+
+networks:
+  default:
+  jenkins:
