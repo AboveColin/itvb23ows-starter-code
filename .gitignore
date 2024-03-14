@@ -1,2 +1,6 @@
 Sonarqube/.scannerwork/report-task.txt
 Sonarqube/.scannerwork/.sonar_lock
+game/
+old/
+App/vendor/bin/.phpunit.result.cache
+App/tests/manualTest.php

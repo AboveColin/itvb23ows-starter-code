@@ -14,16 +14,70 @@ services:
       - MYSQL_DB=hive
     networks:
     - default
+    volumes:
+      - ./App:/var/www/html
 
   db:
     image: mysql:8.0.33
+    ports:
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=hive
     volumes:
       - db_data:/var/lib/mysql
-      - ./hive.sql:/docker-entrypoint-initdb.d/hive.sql
+      - ./Database/hive.sql:/docker-entrypoint-initdb.d/hive.sql
     networks:
     - default
+
+  ai:
+    build: ./AI
+    ports:
+      - "5000:5000"
+    networks:
+    - default
+    volumes:
+      - ./AI:/app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+
+  jenkins:
+    build: ./Jenkins
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      JENKINS_ADMIN_ID: root
+      JENKINS_ADMIN_PASSWORD: root
+      JENKIN_PORT: 8080
+    networks:
+    - default
+    - jenkins
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client
+    
+  sonarqube:
+    build: ./SonarQube
+    image: sonarqube:8.9.0-community
+    ports:
+      - "9000:9000"
+    networks:
+    - default
+    - jenkins
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/temp
+
 volumes:
   db_data:
+  jenkins-data:
+  jenkins-docker-certs:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonarqube_temp:
