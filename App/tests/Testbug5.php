@@ -62,7 +62,7 @@ class Testbug5 extends TestCase {
 
     public function test2() {
         /*
-            Test that the undo function works correctly
+            Test that the undo function works correctly when there is a move to undo and the board is restored to the correct state
         */
         $_SESSION['board'] = [
             '0,0' => [[0, 'Q']],
@@ -73,16 +73,25 @@ class Testbug5 extends TestCase {
             0 => ['Q' => 0],
             1 => ['A' => 2],
         ];
+
+        // Create a new game
         $this->db->prepare('INSERT INTO games VALUES ()')->execute();
         $_SESSION['game_id'] = $this->db->insert_id();
         $_SESSION['last_move'] = 1;
 
+        // Simulate moving the white queen
         $this->game->move('0,0', '0,1');
 
+        // Undo the move
         $this->game->undo();
         $this->assertNull($_SESSION['error'], 'Undo should not produce an error');
         $this->assertArrayHasKey('0,0', $_SESSION['board'], "Board should contain the moved piece at 0,0");
         $this->assertEquals([[0, 'Q']], $_SESSION['board']['0,0'], "Position 0,0 should now have the white queen");
+    }
+
+    protected function tearDown(): void
+    {
+        session_unset();
     }
 
 }

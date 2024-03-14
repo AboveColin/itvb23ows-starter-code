@@ -70,4 +70,9 @@ class Testbug1 extends TestCase
         $this->assertStringContainsString('<option value="0,0">0,0</option>', $output);
         $this->assertStringNotContainsString('<option value="1,1">1,1</option>', $output);
     }
+
+    protected function tearDown(): void
+    {
+        session_unset();
+    }
 }

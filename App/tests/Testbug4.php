@@ -60,7 +60,7 @@ class Testbug4 extends TestCase {
         /*
             Test that a piece can be played on the old position of a moved piece
         */
-        
+
         $_SESSION['board'] = [
             '0,0' => [[0, 'Q']],
         ];
@@ -81,7 +81,11 @@ class Testbug4 extends TestCase {
 
         // Assert that playing a new piece on the old position is successful
         $this->assertArrayHasKey('0,0', $_SESSION['board'], "Board should contain the new piece at 0,0");
-        $this->assertNull($_SESSION['error'], "Expected to successfully place a new piece where the Queen bee was previously");
-        
+        $this->assertNull($_SESSION['error'], "Expected to successfully place a new piece where the Queen bee was previously");   
+    }
+
+    protected function tearDown(): void
+    {
+        session_unset();
     }
 }

@@ -15,38 +15,38 @@ class Testbug3 extends TestCase {
     private $gameLogic;
 
     protected function setUp(): void {
-        // $this->db = $this->createMock(Database::class);
-        // $this->gameLogic = new GameLogic();
-        // $this->game = new Game($this->db, $this->gameLogic);
-
-        // $_SESSION['board'] = [];
-        // $_SESSION['player'] = 0;
-        // $_SESSION['hand'] = [
-        //     0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
-        //     1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
-        // ];
-        $host = 'localhost';
-        $user = 'root';
-        $password = '123456';
-        $database = 'hive';
-
-        $this->db = new Database($host, $user, $password, $database);
+        $this->db = $this->createMock(Database::class);
         $this->gameLogic = new GameLogic();
         $this->game = new Game($this->db, $this->gameLogic);
 
         $_SESSION['board'] = [];
-
         $_SESSION['player'] = 0;
-
         $_SESSION['hand'] = [
             0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
             1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
         ];
+        // $host = 'localhost';
+        // $user = 'root';
+        // $password = '123456';
+        // $database = 'hive';
 
-        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insert_id();
+        // $this->db = new Database($host, $user, $password, $database);
+        // $this->gameLogic = new GameLogic();
+        // $this->game = new Game($this->db, $this->gameLogic);
 
-        $_SESSION['last_move'] = 0;
+        // $_SESSION['board'] = [];
+
+        // $_SESSION['player'] = 0;
+
+        // $_SESSION['hand'] = [
+        //     0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
+        //     1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
+        // ];
+
+        // $this->db->prepare('INSERT INTO games VALUES ()')->execute();
+        // $_SESSION['game_id'] = $this->db->insert_id();
+
+        // $_SESSION['last_move'] = 0;
     }
     public function test1() {
         /*
@@ -74,5 +74,10 @@ class Testbug3 extends TestCase {
         $this->game->play('A', '-1,-1');
 
         $this->assertEquals('Must play queen bee by the fourth move', $_SESSION['error']);
+    }
+
+    protected function tearDown(): void
+    {
+        session_unset();
     }
 }

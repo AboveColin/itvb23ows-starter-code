@@ -134,4 +134,77 @@ class GameRenderer
             }
         } 
     }
+
+    function displayAntTile($p, $q, $min_p, $min_q) {
+        $centerOffsetX = 15; // Horizontal center offset
+        $centerOffsetY = 15; // Vertical center offset
+        $left = ($p - $min_p) * 4 + ($q - $min_q) * 2 + $centerOffsetX;
+        $top = ($q - $min_q) * 4 + $centerOffsetY;
+
+        echo "<div class=\"tile move\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)</div>";
+    }
+
+    public function renderAntMoves($board, $gameLogic) {
+        $antMoves = $gameLogic->calculateAntMoves('0,0', $board, 0);
+
+        $min_p = 1000;
+        $min_q = 1000;
+
+        foreach ($board as $pos => $tile) {
+            list($p, $q) = explode(',', $pos);
+            $min_p = min($p, $min_p);
+            $min_q = min($q, $min_q);
+        }
+
+        foreach ($antMoves as $pos) {
+            list($p, $q) = explode(',', $pos);
+            $this->displayAntTile($p, $q, $min_p, $min_q);
+        }
+    }
+
+    function displaySpiderTile($p, $q, $min_p, $min_q) {
+        $centerOffsetX = 15; // Horizontal center offset
+        $centerOffsetY = 15; // Vertical center offset
+        $left = ($p - $min_p) * 4 + ($q - $min_q) * 2 + $centerOffsetX;
+        $top = ($q - $min_q) * 4 + $centerOffsetY;
+
+        echo "<div class=\"tile move\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)</div>";
+    }
+
+    public function renderSpiderMoves($board, $gameLogic) {
+        $spiderMoves = $gameLogic->calculateSpiderMoves('-1,1', $board, 0);
+
+        $min_p = 1000;
+        $min_q = 1000;
+
+        foreach ($board as $pos => $tile) {
+            list($p, $q) = explode(',', $pos);
+            $min_p = min($p, $min_p);
+            $min_q = min($q, $min_q);
+        }
+
+        foreach ($spiderMoves as $pos) {
+            list($p, $q) = explode(',', $pos);
+            $this->displaySpiderTile($p, $q, $min_p, $min_q);
+        }
+    }
+
+    public function renderOutcome() {
+        if (isset($_SESSION['game_over']) && $_SESSION['game_over']) {
+            $message = "";
+            $messageClass = "outcome";
+            
+            if ($_SESSION['winner'] === 'draw') {
+                $message = "The game ended in a draw.";
+                $messageClass .= " draw"; // Class for draw-specific styling
+            } else {
+                $winnerColor = $_SESSION['winner'] == 0 ? "White" : "Black";
+                $message = "Game over. {$winnerColor} wins!";
+                $messageClass .= " win"; // Class for win-specific styling
+            }
+            
+            echo "<div class=\"{$messageClass}\">{$message}</div>";
+        }
+    }
+    
 }

@@ -94,4 +94,9 @@ class Testbug2 extends TestCase
         $this->assertArrayHasKey($to, $_SESSION['board'], "Board should contain the moved piece at 0,1");
         $this->assertEquals([[0, 'Q']], $_SESSION['board'][$to], "Position 0,0 should now have the white queen");
     }
+
+    protected function tearDown(): void
+    {
+        session_unset();
+    }
 }
