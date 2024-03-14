@@ -44,6 +44,7 @@ foreach ($gameLogic->getOffsets() as $pq) {
 
 $moveto = array_unique($moveto);
 if (!count($moveto)) $moveto[] = '0,0';
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -55,6 +56,9 @@ if (!count($moveto)) $moveto[] = '0,0';
 <body>
     <?php $gameRenderer->renderOutcome(); ?>
         <div class="board">
+            <div id="loadingScreen">
+                Processing AI Move...
+            </div>
             <?php $gameRenderer->renderGhostTiles($board, $gameLogic->getOffsets()) ?>
             <?php $gameRenderer->renderBoard($board); ?>
         </div>
@@ -104,11 +108,16 @@ if (!count($moveto)) $moveto[] = '0,0';
             </select>
             <input type="submit" value="Move">
         </form>
+        
         <?php
             $gameRenderer->displayError();
         ?>
         <hr>
         <div class="actionButtons">
+            <form method="post" action="index.php">
+                <input type="hidden" name="AIMove" value="true">
+                <input type="submit" value="AIMove">
+            </form>
             <form method="post" action="index.php">
                 <input type="hidden" name="pass" value="true">
                 <input type="submit" value="Pass">
@@ -133,6 +142,14 @@ if (!count($moveto)) $moveto[] = '0,0';
         </div>
     </body>
     <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const AIMoveButton = document.querySelector('input[value="AIMove"]');
+            AIMoveButton.addEventListener('click', function() {
+                document.getElementById('loadingScreen').style.display = 'flex';
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const fromSelect = document.querySelector('#from');
             const fromtoSelect = document.querySelector('#fromTo');

@@ -13,6 +13,7 @@ class Game {
     private $game_id;
     private $last_move;
     private $error;
+    private $turn;
 
     public function __construct($db, $gameLogic) {
         $this->db = $db;
@@ -32,6 +33,7 @@ class Game {
         $this->game_id = $_SESSION['game_id'];
         $this->last_move = $_SESSION['last_move'] ?? 0;
         $this->error = $_SESSION['error'] ?? null;
+        $this->turn = $_SESSION['turn'] ?? 0;
     }
 
     public function getBoard() {
@@ -96,10 +98,68 @@ class Game {
                 case isset($_POST['pass']):
                     $this->pass();
                     break;
+                case isset($_POST['AIMove']):
+                    $this->AIMove();
+                    break;
             }
             header('Location: ' . $_SERVER['PHP_SELF']);
             exit();
         }
+    }
+
+    public function AIMove() {
+
+        $url = 'http://ai:5000/';
+        $data = [
+            'move_number' => $this->turn,
+            'hand' => $this->hand,
+            'board' => $this->board
+        ];
+
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/json\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data)
+            )
+        );
+
+        $context = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
+
+        $response = json_decode($response, true);
+
+        if ($response[0] === "play") {
+            // Mogelijk zal de AI zetten doen die ongeldig zijn op grond van de interpretatie van de
+            // regels zoals je applicatie die heeO, maar dit mag je negeren. Je mag gewoon de zet
+            // uitvoeren die de AI voorstelt, ook als deze niet geldig is.
+            $_SESSION['board'][$response[2]] = [[$_SESSION['player'], $response[1]]];
+            $_SESSION['hand'][$this->turn % 2][$response[1]]--;
+            $_SESSION['player'] = 1 - $_SESSION['player'];
+            $this->insertPlay($response[1], $response[2]);
+            $this->checkGameEnd();
+            $_SESSION['turn'] += 1;
+
+            // anders natuurlijk via deze functie
+            // $this->play($response[1], $response[2]);
+        } elseif ($response[0] === "move") {
+            $_SESSION['board'][$response[2]] = [[$_SESSION['player'], $response[1]]];
+            $_SESSION['hand'][$this->turn % 2][$response[1]]--;
+            $_SESSION['player'] = 1 - $_SESSION['player'];
+            $this->insertMove($response[1], $response[2]);
+            $this->checkGameEnd();
+            $_SESSION['turn'] += 1;
+            // anders natuurlijk via deze functie
+            // $this->move($response[1], $response[2]);
+        } else {
+            $_SESSION['board'][$response[2]] = [[$_SESSION['player'], $response[1]]];
+            $_SESSION['hand'][$this->turn % 2][$response[1]]--;
+            $_SESSION['player'] = 1 - $_SESSION['player'];
+            $this->pass();
+            $_SESSION['turn'] += 1;
+        }
+
+
     }
 
     public function restart() {
@@ -109,6 +169,7 @@ class Game {
         $_SESSION['player'] = 0;
         $_SESSION['game_over'] = false;
         $_SESSION['winner'] = null;
+        $_SESSION['turn'] = 0;
 
 
         $this->db->prepare('INSERT INTO games VALUES ()')->execute();
@@ -130,6 +191,7 @@ class Game {
         $stmt->execute();
         $_SESSION['last_move'] = $this->db->insert_id();
         $_SESSION['player'] = 1 - $_SESSION['player'];
+        $_SESSION['turn'] += 1;
     }
 
     // bug fix 5
@@ -163,6 +225,8 @@ class Game {
 
             // set player to the previous player
             $_SESSION['player'] = 1 - $_SESSION['player'];
+
+            $_SESSION['turn'] -= 1;
         }
     }
     
@@ -203,13 +267,15 @@ class Game {
                 $_SESSION['hand'][$player][$piece]--;
                 $_SESSION['player'] = 1 - $_SESSION['player'];
                 $this->insertPlay($piece, $to);
+                $this->checkGameEnd();
+                $_SESSION['turn'] += 1;
             }
         }
            
         elseif (count($board) && !$this->gameLogic->hasNeighBour($to, $board))
             $_SESSION['error'] = "board position has no neighbour";
         elseif (array_sum($hand) < 11 && !$this->gameLogic->neighboursAreSameColor($player, $to, $board))
-            $_SESSION['error'] = "Board position has opposing neighbour";
+            $_SESSION['error'] = "Board position has opposing neighbour, trying to move from: " . $to . " with " . $piece . " sc: " . " sum: " . array_sum($hand);
         elseif (array_sum($hand) <= 8 && $hand['Q']) {
             $_SESSION['error'] = 'Must play queen bee';
         } else {
@@ -218,10 +284,11 @@ class Game {
             $_SESSION['player'] = 1 - $_SESSION['player'];
             $this->insertPlay($piece, $to);
             $this->checkGameEnd();
+            $_SESSION['turn'] += 1;
         }
     }
 
-    private function insertMove($from, $to, $tile) {
+    private function insertMove($from, $to) {
         $gameId = $_SESSION['game_id'];
         $previousId = $_SESSION['last_move'];
         $state = $this->db->get_state();
@@ -311,8 +378,9 @@ class Game {
             // Finalizing the move
             $board[$to] = isset($board[$to]) ? array_merge($board[$to], [$tile]) : [$tile];
             $_SESSION['player'] = 1 - $_SESSION['player'];
-            $this->insertMove($from, $to, $tile);
+            $this->insertMove($from, $to);
             $this->checkGameEnd();
+            $_SESSION['turn'] += 1;
         }
         
         if (empty($board[$from])) {
@@ -349,6 +417,4 @@ class Game {
         // No conditions met, the game continues
         $_SESSION['game_over'] = false;
     }
-
-    
 }
