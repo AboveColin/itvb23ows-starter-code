@@ -1,7 +1,7 @@
 pipeline {
     agent any
     stages {
-        
+
         stage('SCM') {
             steps {
                 echo 'Checking out code...'
@@ -31,9 +31,15 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            def scannerHome = tool 'OWS';
-            withSonarQubeEnv() {
-            sh "${scannerHome}/bin/sonar-scanner"
+            agent any
+            tools {
+                jdk 'JDK8';
+                scannerHome = tool 'OWS';
+            }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
             }
         }
 
