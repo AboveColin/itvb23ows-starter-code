@@ -1,8 +1,8 @@
 body {
     font-family: "Open Sans", sans-serif;
-    background-color: #eaeaea; /* Soft background color */
-    color: #333; /* Primary text color */
-    line-height: 1.6; /* Spacing between lines of text */
+    background-color: #eaeaea;
+    color: #333;
+    line-height: 1.6;
 }
 
 div.board {

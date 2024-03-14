@@ -54,6 +54,7 @@ services:
       JENKIN_PORT: 8080
     networks:
     - default
+    - jenkins
     volumes:
       - jenkins-data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client
@@ -65,6 +66,7 @@ services:
       - "9000:9000"
     networks:
     - default
+    - jenkins
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
