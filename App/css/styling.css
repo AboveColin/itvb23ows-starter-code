@@ -33,8 +33,6 @@ div.hand {
     display: inline-block;
 }
 
-
-
 div.tile {
     display: inline-block;
     width: 4em;
@@ -85,6 +83,7 @@ div.tile:not(.ghost):hover {
     transform: scale(1.10);
     z-index: 10;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
 }
 
 img.tileImage {
