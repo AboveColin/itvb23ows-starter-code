@@ -135,17 +135,17 @@ class Game {
 
         $_SESSION['board'] = [];
         $_SESSION['hand'] = [0 => [
-            "Q" => 1, 
-            "B" => 2, 
-            "S" => 2, 
-            "A" => 3, 
+            "Q" => 1,
+            "B" => 2,
+            "S" => 2,
+            "A" => 3,
             "G" => 3
-        ], 
+        ],
         1 => [
-            "Q" => 1, 
-            "B" => 2, 
-            "S" => 2, 
-            "A" => 3, 
+            "Q" => 1,
+            "B" => 2,
+            "S" => 2,
+            "A" => 3,
             "G" => 3
         ]];
         $_SESSION['player'] = 0;
@@ -168,7 +168,9 @@ class Game {
 
         // Continue with the pass logic if no valid moves are available
         $stmt = $this->db->prepare(
-            'insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "pass", null, null, ?, ?)'
+            'insert into moves
+            (game_id, type, move_from, move_to, previous_id, state) 
+            values (?, "pass", null, null, ?, ?)'
         );
         $state = $this->db->getState();
         $stmt->bind_param('iis', $_SESSION['game_id'], $_SESSION['last_move'], $state);
@@ -267,7 +269,7 @@ class Game {
         $previousId = $_SESSION['last_move'];
         $state = $this->db->getState();
         
-        $query = 'INSERT INTO moves (game_id, type, move_from, move_to, previous_id, state) 
+        $query = 'INSERT INTO moves (game_id, type, move_from, move_to, previous_id, state)
                 VALUES (?, "move", ?, ?, ?, ?)';
                 
         $stmt = $this->db->prepare($query);
@@ -312,18 +314,28 @@ class Game {
                 }
                 break;
             case "A":
-                if (!$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateAntMoves($from, $board, $player))) {
-                    $_SESSION['error'] = "Invalid ant move";
-                    $board[$from][] = $tile; // Return the tile to its original position
-                    return;
+                if (!$this->gameLogic->checkIfMoveinCalculatedArray(
+                        $to, 
+                        $this->gameLogic->calculateAntMoves($from, $board, $player)
+                    )) {
+
+                        $_SESSION['error'] = "Invalid ant move";
+                        $board[$from][] = $tile; // Return the tile to its original position
+                        return;
                 }
                 break;
             case "S":
-                if (!$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateSpiderMoves($from, $board, $player))) {
-                    $_SESSION['error'] = "Invalid spider move";
-                    $board[$from][] = $tile; // Return the tile to its original position
-                    return;
+                if (!$this->gameLogic->checkIfMoveinCalculatedArray(
+                        $to, 
+                        $this->gameLogic->calculateSpiderMoves($from, $board, $player)
+                    )) {
+
+                        $_SESSION['error'] = "Invalid spider move";
+                        $board[$from][] = $tile; // Return the tile to its original position
+                        return;
                 }
+                break;
+            default:
                 break;
         }
 
@@ -396,5 +408,3 @@ class Game {
         $_SESSION['game_over'] = false;
     }
 }
-
-?>

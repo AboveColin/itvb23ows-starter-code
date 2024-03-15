@@ -51,7 +51,7 @@ class GameLogic {
         foreach ($this->offsets as $pq) {
             $p = $b[0] + $pq[0];
             $q = $b[1] + $pq[1];
-            if ($this->isNeighbour($from, "$p,$q")) { 
+            if ($this->isNeighbour($from, "$p,$q")) {
                 $common[] = "$p,$q";
             }
                 
@@ -132,7 +132,7 @@ class GameLogic {
         }
     
         if (empty($validPositions)) {
-            $validPositions[] = '0,0'; 
+            $validPositions[] = '0,0';
         }
     
         return array_unique($validPositions);
@@ -203,7 +203,7 @@ class GameLogic {
                         $isValid = $hasJumped;
                     }
                     break;
-                } else if (!isset($board[$currentPosKey])) {
+                } elseif (!isset($board[$currentPosKey])) {
                     if ($hasJumped) {
                         // If it has already jumped and finds an empty space, the move is valid
                         $isValid = true;
@@ -245,7 +245,7 @@ class GameLogic {
             $currentPosition = $queue->dequeue();
             foreach ($this->getOffsets() as $offset) {
                 $newPos = (
-                        explode(',', $currentPosition)[0] + $offset[0]) . ',' . 
+                        explode(',', $currentPosition)[0] + $offset[0]) . ',' .
                     (
                         explode(',', $currentPosition)[1] + $offset[1]);
                 
@@ -308,8 +308,8 @@ class GameLogic {
         
         foreach ($this->getOffsets() as $offset) {
             $newPos = (explode(',', $currentPos)[0] + $offset[0]) . ',' . (explode(',', $currentPos)[1] + $offset[1]);
-            if (!isset($visited[$newPos]) 
-                && $this->slide($board, $currentPos, $newPos) 
+            if (!isset($visited[$newPos])
+                && $this->slide($board, $currentPos, $newPos)
                 && $this->isAdjacentToAtLeastOneTile($newPos, $board)) {
                 // Recursief de mogelijke zetten van de spin berekenen
                 $this->dfsSpider($newPos, $board, $player, $depth + 1, $visited, $validMoves);
