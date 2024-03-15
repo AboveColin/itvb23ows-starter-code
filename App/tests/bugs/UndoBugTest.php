@@ -15,6 +15,12 @@ class UndoBugTest extends TestCase {
     private $db;
     private $gameLogic;
 
+    private function insertIntodb() {
+        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
+        $_SESSION['game_id'] = $this->db->insertId();
+        return $_SESSION['game_id'];
+    }
+
     protected function setUp(): void
     {
         $host = 'db';
@@ -35,18 +41,18 @@ class UndoBugTest extends TestCase {
             1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
         ];
 
-        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insertId();
+        $_SESSION['game_id'] = $this->insertIntodb();
 
         $_SESSION['last_move'] = 0;
     }
+
+    
 
     public function testUndoWithoutMoves() {
         /*
             Test that the undo function produces an error when there are no moves to undo
         */
-        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insertId();
+        $_SESSION['game_id'] = $this->insertIntodb();
 
         $_SESSION['last_move'] = 0;
         $_SESSION['board'] = [];
@@ -76,8 +82,7 @@ class UndoBugTest extends TestCase {
         ];
 
         // Create a new game
-        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insert_id();
+        $_SESSION['game_id'] = $this->insertIntodb();
         $_SESSION['last_move'] = 1;
 
         // Simulate moving the white queen
