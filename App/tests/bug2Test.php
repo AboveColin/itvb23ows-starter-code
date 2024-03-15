@@ -1,7 +1,5 @@
 <?php
 
-require 'vendor/autoload.php';
-
 use Colin\Hive\Database;
 use Colin\Hive\Game;
 use Colin\Hive\GameLogic;

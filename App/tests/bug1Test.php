@@ -1,7 +1,5 @@
 <?php
 
-// require '/var/jenkins_home/workspace/OWS@3/App/vendor/autoload.php';
-
 use Colin\Hive\Game;
 use Colin\Hive\GameRenderer;
 use Colin\Hive\GameLogic;
