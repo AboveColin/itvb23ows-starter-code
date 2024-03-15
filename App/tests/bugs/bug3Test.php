@@ -5,7 +5,7 @@ use Colin\Hive\Database;
 use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 
-class Testbug3 extends TestCase {
+class bug3Test extends TestCase {
     /*
         3. Als wit drie stenen plaatst die geen bijenkoningin zijn, mag hij als vierde zet helemaal
         geen steen spelen. Het spel loopt dan dus vast.
@@ -48,7 +48,8 @@ class Testbug3 extends TestCase {
 
         // $_SESSION['last_move'] = 0;
     }
-    public function test1() {
+
+    public function testQueenBeemustBePlayedByTheFourthMove() {
         /*
             Test that the Queen Bee must be played by the fourth move
         */

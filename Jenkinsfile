@@ -1,43 +1,40 @@
 pipeline {
     agent any
-
     stages {
-        stage('Build') {
+
+        stage('SCM') {
             steps {
-                echo 'Building the project...'
+                echo 'Checking out code...'
                 checkout scm
             }
         }
 
-        stage('Test') {
+        stage('phpunit tests') {
             steps {
-                echo 'Running tests...'
+                sh 'php -v'
+                sh 'composer --version'
+                sh "composer install --working-dir ${env.WORKSPACE}/App"
+                sh "chmod +x ${env.WORKSPACE}/App/vendor/bin/phpunit"
+                sh "${env.WORKSPACE}/App/vendor/bin/phpunit --version"
+                sh "${env.WORKSPACE}/App/vendor/bin/phpunit --configuration ${env.WORKSPACE}/App/phpunit.xml"
+
             }
         }
 
-        stage('SonarQube') {
-          steps {
-            script { scannerHome = tool 'OWS' }
-            withSonarQubeEnv('OWS') {
-            sh '${scannerHome}/bin/sonar-scanner -D"sonar.projectKey=OWS" -D"sonar.sources=." -D"sonar.host.url=http://sonarqube:9000" -D"sonar.token=squ_37281e5b1fec23694973648bdff8718b5056ea68"'
+        stage('SonarQube Analysis') {
+            steps {
+                script { scannerHome = tool 'OWS' }
+                withSonarQubeEnv('OWS') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+                echo 'SonarQube analysis completed'
             }
-          }
         }
-
 
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
             }
         }
-    }
-
-    post {
-        success {
-            echo 'Build successful! Deploying...'
-        }
-        failure {
-            echo 'Build failed! Notify the team...'
-        }
-    }
+    }   
 }

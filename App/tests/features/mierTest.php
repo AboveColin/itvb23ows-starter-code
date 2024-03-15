@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Colin\Hive\GameLogic;
 
-class TestMier extends TestCase
+class mierTest extends TestCase
 {
     private $gameLogic;
 
@@ -11,7 +11,7 @@ class TestMier extends TestCase
     {
         $this->gameLogic = new GameLogic();
     }
-
+    
     public function testSoldierAntCanMoveUnlimited()
     {
         /*
@@ -46,7 +46,6 @@ class TestMier extends TestCase
 
         $this->assertNotContains('0,0', $validPositions);
     }
-
     public function testSoldierAntMovesOnlyToEmptyFields()
     {
         /*
