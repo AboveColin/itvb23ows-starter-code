@@ -80,6 +80,7 @@ class bug2Test extends TestCase
             0 => ['Q' => 0],
             1 => ['A' => 2],
         ];
+        $_SESSION['turn'] = 0;
         
         $from = '0,0';
         $to = '0,1';
