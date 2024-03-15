@@ -28,7 +28,8 @@ class SpinTest extends TestCase {
             '0,0' => [[0, 'S']]
         ];
         $spiderMoves = $this->gameLogic->calculateSpiderMoves('0,0', $board, 0);
-        $this->assertCount(0, $spiderMoves, "Spider should not have valid moves from starting position with no neighbors.");
+        $this->assertCount(0, $spiderMoves, 
+            "Spider should not have valid moves from starting position with no neighbors.");
     }
 
     public function testSpiderMovesWithValidOptions() {
@@ -68,7 +69,9 @@ class SpinTest extends TestCase {
             // Set up a board configuration where moving the spider would break hive connectivity
         ];
         $spiderMoves = $this->gameLogic->calculateSpiderMoves('0,0', $board, 0);
-        $this->assertNotContains('expected_invalid_move', $spiderMoves, "Spider should not make a move that breaks hive connectivity.");
+        $this->assertNotContains('expected_invalid_move',
+         $spiderMoves, 
+         "Spider should not make a move that breaks hive connectivity.");
     }
 
     public function testSpiderMovesBlockedByOtherTiles() {

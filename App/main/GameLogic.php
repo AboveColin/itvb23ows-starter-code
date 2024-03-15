@@ -241,7 +241,7 @@ class GameLogic {
             for ($i = 0; $i < 6; $i++) {
                 $newPos =
                 (explode(',', $pos)[0] + $this->getOffsets()[$i][0])
-                    . ',' . 
+                    . ',' .
                 (explode(',', $pos)[1] + $this->getOffsets()[$i][1]);
 
                 if ($this->isValidGrasshopperMove($from, $newPos, $board)) {
@@ -276,7 +276,7 @@ class GameLogic {
                     $tempBoard[$newPos] = [[$player, 'A']]; // Simulate moving the ant to the new position
                     
                     // Ensure the hive remains connected after the simulated move
-                    if ($this->isHiveConnected($tempBoard)) { 
+                    if ($this->isHiveConnected($tempBoard)) {
                         $validMoves[] = $newPos;
                         $visited[$newPos] = true;
                         $queue->enqueue($newPos);

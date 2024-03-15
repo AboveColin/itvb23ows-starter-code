@@ -133,18 +133,19 @@ class GameRenderer
                 htmlspecialchars($row[3]) .'.png" style="width: 15px"/> '.
                 htmlspecialchars($row[2]).' '.
                 htmlspecialchars($row[3]).' '.
-                htmlspecialchars($row[4]).'</li>';
+                htmlspecialchars($row[4]);
 
             } elseif ($row[2] == 'move') {
                 echo '<li><img src="'.
                 htmlspecialchars($row[2]) .'.png" style="width: 15px"/> '.
                 htmlspecialchars($row[2]).' '.
                 htmlspecialchars($row[3]).' '.
-                htmlspecialchars($row[4]).'</li>';
+                htmlspecialchars($row[4]);
 
             } else {
-                echo '<li>'.htmlspecialchars($row[2]) .'</li>';
+                echo '<li>'.htmlspecialchars($row[2]);
             }
+            echo '</li>';
         }
     }
 

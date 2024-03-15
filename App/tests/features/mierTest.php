@@ -72,6 +72,3 @@ class MierTest extends TestCase
         session_unset();
     }
 }
-
-
-?>

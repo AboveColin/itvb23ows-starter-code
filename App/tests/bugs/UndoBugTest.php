@@ -62,7 +62,8 @@ class UndoBugTest extends TestCase {
 
     public function TestundoWithMoves() {
         /*
-            Test that the undo function works correctly when there is a move to undo and the board is restored to the correct state
+            Test that the undo function works correctly when there is a move to undo
+            and the board is restored to the correct state
         */
         $_SESSION['board'] = [
             '0,0' => [[0, 'Q']],

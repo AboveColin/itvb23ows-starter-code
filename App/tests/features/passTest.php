@@ -12,7 +12,7 @@ class PassTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->db = $this->createMock(Database::class); 
+        $this->db = $this->createMock(Database::class);
     
         $stmt = $this->createMock(mysqli_stmt::class);
         $stmt->method('bind_param')->willReturn(true);
@@ -68,6 +68,3 @@ class PassTest extends TestCase
         session_unset();
     }
 }
-
-
-?>
