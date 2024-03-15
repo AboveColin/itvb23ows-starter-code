@@ -5,7 +5,7 @@ use Colin\Hive\GameLogic;
 use Colin\Hive\Database;
 use PHPUnit\Framework\TestCase;
 
-class passTest extends TestCase
+class PassTest extends TestCase
 {
     private $db;
     private $gameLogic;

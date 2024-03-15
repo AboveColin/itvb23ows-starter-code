@@ -4,7 +4,7 @@ use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 use Colin\Hive\Database;
 
-class bug5Test extends TestCase {
+class UndoBugTest extends TestCase {
     /*
     5. De undo-functionaliteit werkt nog niet goed. De oude zeAen worden nog niet
         verwijderd, en de toestand van het bord wordt niet altijd goed hersteld. Bovendien

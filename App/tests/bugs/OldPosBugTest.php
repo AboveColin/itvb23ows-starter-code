@@ -5,7 +5,7 @@ use Colin\Hive\Database;
 use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 
-class bug4Test extends TestCase {
+class OldPosBugTest extends TestCase {
     /*
         4. Als je een steen verplaatst, kan je daarna geen nieuwe steen spelen op het oude veld,
         ook als dat volgens de regels wel zou mogen.

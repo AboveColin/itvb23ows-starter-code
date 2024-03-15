@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Colin\Hive\GameLogic;
 
-class sprinkhaanTest extends TestCase
+class SprinkhaanTest extends TestCase
 {
     private $gameLogic;
 

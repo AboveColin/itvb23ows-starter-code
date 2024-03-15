@@ -5,7 +5,7 @@ use Colin\Hive\Database;
 use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 
-class bug3Test extends TestCase {
+class FourthMoveBugTest extends TestCase {
     /*
         3. Als wit drie stenen plaatst die geen bijenkoningin zijn, mag hij als vierde zet helemaal
         geen steen spelen. Het spel loopt dan dus vast.

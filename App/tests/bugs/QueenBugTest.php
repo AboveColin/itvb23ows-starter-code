@@ -5,7 +5,7 @@ use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 use PHPUnit\Framework\TestCase;
 
-class bug2Test extends TestCase
+class QueenBugTest extends TestCase
 {
     /*
         2. Als wit een bijenkoningin speelt op (0, 0), en zwart op (1, 0), dan zou het een legale zet
