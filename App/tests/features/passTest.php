@@ -1,7 +1,9 @@
 <?php
 
-use Colin\Hive\Game;
-use Colin\Hive\GameLogic;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameController;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 use Colin\Hive\Database;
 use PHPUnit\Framework\TestCase;
 
@@ -9,6 +11,9 @@ class PassTest extends TestCase
 {
     private $db;
     private $gameLogic;
+    private $game;
+    private $gameValidator;
+    private $moveCalculator;
 
     protected function setUp(): void
     {
@@ -19,15 +24,16 @@ class PassTest extends TestCase
         $stmt->method('execute')->willReturn(true);
         $this->db->method('prepare')->willReturn($stmt);
 
-        $this->gameLogic = $this->createMock(GameLogic::class);
+        $this->gameLogic = $this->createMock(BaseGameLogic::class);
+        $this->gameValidator = $this->createMock(GameValidator::class);
+        $this->moveCalculator = new MoveCalculator();
+        $this->game = new GameController($this->db, $this->gameLogic, $this->moveCalculator, $this->gameValidator);
     }
 
     public function testPassWithNoValidMoves()
     {
         // Simulate a scenario where there are no valid moves available
-        $this->gameLogic->method('hasValidMoves')->willReturn(false);
-
-        $game = new Game($this->db, $this->gameLogic);
+        $this->gameValidator->method('hasValidMoves')->willReturn(false);
         
         // Mocking session data
         $_SESSION['game_id'] = 1;
@@ -35,7 +41,7 @@ class PassTest extends TestCase
         $_SESSION['player'] = 0;
         $_SESSION['turn'] = 0;
 
-        $game->pass();
+        $this->game->pass();
 
         // Assert that the player has been changed, indicating a successful pass
         $this->assertEquals(1, $_SESSION['player']);
@@ -44,9 +50,7 @@ class PassTest extends TestCase
     public function testPassWithValidMoves()
     {
         // Simulate a scenario where there are valid moves available
-        $this->gameLogic->method('hasValidMoves')->willReturn(true);
-
-        $game = new Game($this->db, $this->gameLogic);
+        $this->gameValidator->method('hasValidMoves')->willReturn(true);
         
         // Mocking session data
         $_SESSION['game_id'] = 1;
@@ -55,7 +59,7 @@ class PassTest extends TestCase
         $_SESSION['error'] = null;
         $_SESSION['turn'] = 0;
 
-        $game->pass();
+        $this->game->pass();
 
         // Assert that an error message was set, preventing the pass
         $this->assertEquals("Cannot pass, valid moves are available.", $_SESSION['error']);

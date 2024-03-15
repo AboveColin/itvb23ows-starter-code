@@ -1,7 +1,9 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use Colin\Hive\Game;
-use Colin\Hive\GameLogic;
+use Colin\Hive\GameController;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 use Colin\Hive\Database;
 
 class UndoBugTest extends TestCase {
@@ -14,6 +16,8 @@ class UndoBugTest extends TestCase {
     private $game;
     private $db;
     private $gameLogic;
+    private $gameValidator;
+    private $moveCalculator;
 
     private function insertIntodb() {
         $this->db->prepare('INSERT INTO games VALUES ()')->execute();
@@ -23,14 +27,15 @@ class UndoBugTest extends TestCase {
 
     protected function setUp(): void
     {
-        $host = 'db';
+        $host = 'localhost';
         $user = 'root';
         $password = '123456';
         $database = 'hive';
 
         $this->db = new Database($host, $user, $password, $database);
-        $this->gameLogic = new GameLogic();
-        $this->game = new Game($this->db, $this->gameLogic);
+        $this->gameLogic = new BaseGameLogic();
+        $this->moveCalculator = new MoveCalculator();
+        $this->game = new GameController($this->db, $this->gameLogic, $this->moveCalculator, $this->gameValidator);
 
         $_SESSION['board'] = [];
 

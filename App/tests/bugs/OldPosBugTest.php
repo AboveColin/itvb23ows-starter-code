@@ -2,8 +2,10 @@
 
 use PHPUnit\Framework\TestCase;
 use Colin\Hive\Database;
-use Colin\Hive\Game;
-use Colin\Hive\GameLogic;
+use Colin\Hive\GameController;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 
 class OldPosBugTest extends TestCase {
     /*
@@ -13,6 +15,8 @@ class OldPosBugTest extends TestCase {
     private $game;
     private $db;
     private $gameLogic;
+    private $gameValidator;
+    private $moveCalculator;
 
     protected function setUp(): void {
         /**
@@ -35,14 +39,16 @@ class OldPosBugTest extends TestCase {
          * ];
          */
         
-        $host = 'db';
+        $host = 'localhost';
         $user = 'root';
         $password = '123456';
         $database = 'hive';
 
         $this->db = new Database($host, $user, $password, $database);
-        $this->gameLogic = new GameLogic();
-        $this->game = new Game($this->db, $this->gameLogic);
+        $this->gameLogic = new BaseGameLogic();
+        $this->gameValidator = new GameValidator();
+        $this->moveCalculator = new MoveCalculator();
+        $this->game = new GameController($this->db, $this->gameLogic, $this->moveCalculator, $this->gameValidator);
 
         $_SESSION['board'] = [];
 

@@ -2,9 +2,12 @@
 
 namespace Colin\Hive;
 
-class Game {
+
+class GameController {
     
     private $db;
+    private $moveCalculator;
+    private $gameValidator;
     private $gameLogic;
 
     private $board;
@@ -15,9 +18,11 @@ class Game {
     private $error;
     private $turn;
 
-    public function __construct($db, $gameLogic) {
+    public function __construct($db, $baseGameLogic, $moveCalculator, $gameValidator) {
         $this->db = $db;
-        $this->gameLogic = $gameLogic;
+        $this->gameLogic = $baseGameLogic;
+        $this->moveCalculator = $moveCalculator;
+        $this->gameValidator = $gameValidator;
     }
 
     public function startInitGame() {
@@ -25,7 +30,7 @@ class Game {
         $this->board = $_SESSION['board'];
 
         if (!isset($this->board)) {
-            $this->gameLogic->restart();
+            $this->restart();
         }
 
         $this->player = $_SESSION['player'];
@@ -161,7 +166,7 @@ class Game {
     
     public function pass() {
         // Before allowing the pass, check if the player has any valid moves
-        if ($this->gameLogic->hasValidMoves($this->board, $this->hand, $this->player)) {
+        if ($this->gameValidator->hasValidMoves($this->board, $this->hand, $this->player)) {
             $_SESSION['error'] = "Cannot pass, valid moves are available.";
             return;
         }
@@ -307,16 +312,16 @@ class Game {
 
         switch($tile[1]) {
             case "G":
-                if (!$this->gameLogic->isValidGrasshopperMove($from, $to, $board)) {
+                if (!$this->moveCalculator->isValidGrasshopperMove($from, $to, $board)) {
                     $_SESSION['error'] = "Invalid grasshopper move";
                     $board[$from][] = $tile; // Return the tile to its original position
                     return;
                 }
                 break;
             case "A":
-                if (!$this->gameLogic->checkIfMoveinCalculatedArray(
+                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
                         $to,
-                        $this->gameLogic->calculateAntMoves($from, $board, $player)
+                        $this->moveCalculator->calculateAntMoves($from, $board, $player)
                     )) {
 
                         $_SESSION['error'] = "Invalid ant move";
@@ -325,9 +330,9 @@ class Game {
                 }
                 break;
             case "S":
-                if (!$this->gameLogic->checkIfMoveinCalculatedArray(
+                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
                         $to,
-                        $this->gameLogic->calculateSpiderMoves($from, $board, $player)
+                        $this->moveCalculator->calculateSpiderMoves($from, $board, $player)
                     )) {
 
                         $_SESSION['error'] = "Invalid spider move";
@@ -362,7 +367,7 @@ class Game {
             $_SESSION['error'] = 'Tile must move';
         } elseif (isset($board[$to]) && $tile[1] != "B") {
             $_SESSION['error'] = 'Tile not empty';
-        } elseif (in_array($tile[1], ["Q", "B"]) && !$this->gameLogic->slide($board, $from, $to)) {
+        } elseif (in_array($tile[1], ["Q", "B"]) && !$this->moveCalculator->slide($board, $from, $to)) {
             $_SESSION['error'] = 'Tile must slide';
         } else {
             // Finalizing the move
@@ -386,19 +391,19 @@ class Game {
     }
 
     public function checkGameEnd() {
-        if ($this->gameLogic->isDraw($this->board)) {
+        if ($this->gameValidator->isDraw($this->board)) {
             $_SESSION['game_over'] = true;
             $_SESSION['winner'] = 'draw';
             return;
         }
 
-        if ($this->gameLogic->isQueenSurrounded($this->board, 0)) { // Check if the white queen is surrounded
+        if ($this->gameValidator->isQueenSurrounded($this->board, 0)) { // Check if the white queen is surrounded
             $_SESSION['game_over'] = true;
             $_SESSION['winner'] = 1; // Black wins
             return;
         }
 
-        if ($this->gameLogic->isQueenSurrounded($this->board, 1)) { // Check if the black queen is surrounded
+        if ($this->gameValidator->isQueenSurrounded($this->board, 1)) { // Check if the black queen is surrounded
             $_SESSION['game_over'] = true;
             $_SESSION['winner'] = 0; // White wins
             return;

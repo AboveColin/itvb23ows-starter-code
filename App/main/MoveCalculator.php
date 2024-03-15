@@ -2,56 +2,10 @@
 
 namespace Colin\Hive;
 
-class GameLogic {
-    private $offsets;
+class MoveCalculator extends BaseGameLogic {
 
     public function __construct() {
-        $this->offsets = [[0, 1], [0, -1], [1, 0], [-1, 0], [-1, 1], [1, -1]];
-    }
-
-    public function getOffsets() {
-        return $this->offsets;
-    }
-
-    public function isNeighbour($a, $b) {
-        $returnvar = false;
-        $a = explode(',', $a);
-        $b = explode(',', $b);
-        if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) {
-            $returnvar = true;
-        }
-        if ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1) {
-            $returnvar = true;
-        }
-        if ($a[0] + $a[1] == $b[0] + $b[1]) {
-            $returnvar = true;
-        }
-        return $returnvar;
-    }
-    
-    public function hasNeighBour($a, $board) {
-        foreach (array_keys($board) as $b) {
-            if ($this->isNeighbour($a, $b)) {
-                return true;
-            }
-        }
-    }
-    
-    public function neighboursAreSameColor($player, $a, $board) {
-        foreach ($board as $b => $st) {
-            if (!$st) {
-                continue;
-            }
-            $c = $st[count($st) - 1][0];
-            if ($c != $player && $this->isNeighbour($a, $b)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    private function len($tile) {
-        return $tile ? count($tile) : 0;
+        parent::__construct();
     }
     
     public function slide($board, $from, $to) {
@@ -83,56 +37,6 @@ class GameLogic {
         return min($lenCommon0, $lenCommon1) <= max($lenFrom, $lenTo);
     }
 
-    public function isValidPosition($position, $board, $player) {
-        if ($this->hasNeighBour($position, $board) && $this->neighboursAreSameColor($player, $position, $board)) {
-            return true;
-        }
-        return false;
-    }
-
-    public function isHiveConnected($board) {
-        if (count($board) <= 1) {
-            // The hive is connected if there's only one tile in the board.
-            return true;
-        }
-    
-        $visited = [];
-        $start = array_key_first($board); // Starting from the first tile in the board.
-        $this->dfs($start, $board, $visited); // Depth-first search to visit all connected tiles.
-    
-        // If the number of visited nodes equals the number of tiles in the board, the hive is connected.
-        return count($visited) === count($board);
-    }
-
-    private function dfs($pos, $board, &$visited) {
-        // Depth-first search to visit all connected tiles.
-        if (array_key_exists($pos, $visited)) {
-            // Already visited this position.
-            return;
-        }
-
-        $visited[$pos] = true; // Mark as visited.
-
-        // Recursively visit all neighbors.
-        $neighbors = $this->getNeighbors($pos);
-        foreach ($neighbors as $neighbor) {
-            if (isset($board[$neighbor]) && !isset($visited[$neighbor])) {
-                $this->dfs($neighbor, $board, $visited);
-            }
-        }
-    }
-
-    private function getNeighbors($pos) {
-        $offsets = $this->getOffsets();
-        list($x, $y) = explode(',', $pos);
-        $neighbors = [];
-        foreach ($offsets as $offset) {
-            $neighbors[] = ($x + $offset[0]) . ',' . ($y + $offset[1]);
-        }
-        return $neighbors;
-    }
-
-
     public function calculatePositions($board, $offsets, $player) {
         // bug fix #1
         $validPositions = [];
@@ -150,9 +54,14 @@ class GameLogic {
     
         return array_unique($validPositions);
     }
-    
+
     private function isInitialMove($board) {
         return count($board) == 1 && isset($board['0,0']);
+    }
+
+    private function gcd($a, $b) {
+        // functie om de rechte lijn te berekenen
+        return $b ? $this->gcd($b, $a % $b) : $a;
     }
 
     private function calculateInitialPositions($offsets, $board) {
@@ -178,11 +87,6 @@ class GameLogic {
             }
         }
         return $validPositions;
-    }
-
-    private function gcd($a, $b) {
-        // functie om de rechte lijn te berekenen
-        return $b ? $this->gcd($b, $a % $b) : $a;
     }
 
     public function isValidGrasshopperMove($from, $to, $board) : bool {
@@ -233,7 +137,6 @@ class GameLogic {
     
         return $isValid;
     }
-    
 
     public function calculateGrasshopperMoves($from, $board) {
         $validMoves = [];
@@ -349,68 +252,4 @@ class GameLogic {
         return false;
     }
 
-    public function hasValidMoves($board, $hand, $player) {
-
-        foreach (array_keys($hand[$player]) as $tile) {
-            if ($hand[$player][$tile] > 0) {
-                foreach (array_keys($board) as $pos) {
-                    if ($board[$pos][count($board[$pos]) - 1][0] == $player) {
-                        if ($tile == 'A') {
-                            $calculatedMoves = $this->calculateAntMoves($pos, $board, $player);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        } elseif ($tile == 'S') {
-                            $calculatedMoves = $this->calculateSpiderMoves($pos, $board, $player);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        } elseif ($tile == 'G') {
-                            $calculatedMoves = $this->calculateGrasshopperMoves($pos, $board);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        } else {
-                            $calculatedMoves = $this->calculatePositions($board, $this->getOffsets(), $player);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return false; // No valid moves found
-    }
-
-    // Win check functions
-    public function isQueenSurrounded($board, $player) {
-        foreach ($board as $pos => $tiles) {
-            foreach ($tiles as $tile) {
-                if ($tile[1] == 'Q' && $tile[0] == $player) {
-                    return $this->areAllNeighborsOccupied($pos, $board);
-                }
-            }
-        }
-        return false;
-    }
-
-    private function areAllNeighborsOccupied($pos, $board) {
-        $neighbors = $this->getNeighbors($pos);
-        foreach ($neighbors as $neighbor) {
-            if (!isset($board[$neighbor])) {
-                return false; // Found an unoccupied neighbor
-            }
-        }
-        return true; // All neighbors are occupied
-    }
-
-    public function isDraw($board) {
-        $whiteQueenSurrounded = $this->isQueenSurrounded($board, 0);
-        $blackQueenSurrounded = $this->isQueenSurrounded($board, 1);
-
-        return $whiteQueenSurrounded && $blackQueenSurrounded;
-    }
-    
 }

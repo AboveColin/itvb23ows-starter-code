@@ -1,14 +1,20 @@
 <?php
 
-use Colin\Hive\GameLogic;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 use PHPUnit\Framework\TestCase;
 
 class SpinTest extends TestCase {
 
     private $gameLogic;
+    private $gameValidator;
+    private $moveCalculator;
 
     protected function setUp(): void {
-        $this->gameLogic = new GameLogic();
+        $this->gameLogic = new BaseGameLogic();
+        $this->gameValidator = new GameValidator();
+        $this->moveCalculator = new MoveCalculator();
     }
 
     public function testSpiderMoveWithEmptyBoard() {
@@ -16,7 +22,7 @@ class SpinTest extends TestCase {
             Test that the spider cannot move on an empty board
         */
         $board = [];
-        $spiderMoves = $this->gameLogic->calculateSpiderMoves('0,0', $board, 0);
+        $spiderMoves = $this->moveCalculator->calculateSpiderMoves('0,0', $board, 0);
         $this->assertCount(0, $spiderMoves, "Spider should not move on an empty board.");
     }
 
@@ -27,7 +33,7 @@ class SpinTest extends TestCase {
         $board = [
             '0,0' => [[0, 'S']]
         ];
-        $spiderMoves = $this->gameLogic->calculateSpiderMoves('0,0', $board, 0);
+        $spiderMoves = $this->moveCalculator->calculateSpiderMoves('0,0', $board, 0);
         $this->assertCount(0, $spiderMoves, 
             "Spider should not have valid moves from starting position with no neighbors.");
     }
@@ -42,7 +48,7 @@ class SpinTest extends TestCase {
             '1,0' => [[0, 'B']],
             '-2,0' => [[0, 'S']],
         ];
-        $spiderMoves = $this->gameLogic->calculateSpiderMoves('-2,0', $board, 0);
+        $spiderMoves = $this->moveCalculator->calculateSpiderMoves('-2,0', $board, 0);
         $expectedMoves = [
             '-2,-1',
             '-1,-1',
@@ -68,7 +74,7 @@ class SpinTest extends TestCase {
         $board = [
             // Set up a board configuration where moving the spider would break hive connectivity
         ];
-        $spiderMoves = $this->gameLogic->calculateSpiderMoves('0,0', $board, 0);
+        $spiderMoves = $this->moveCalculator->calculateSpiderMoves('0,0', $board, 0);
         $this->assertNotContains('expected_invalid_move',
          $spiderMoves, 
          "Spider should not make a move that breaks hive connectivity.");
@@ -82,7 +88,7 @@ class SpinTest extends TestCase {
         $board = [
             // Set up a board configuration where the spider is completely surrounded by other tiles
         ];
-        $spiderMoves = $this->gameLogic->calculateSpiderMoves('0,0', $board, 0);
+        $spiderMoves = $this->moveCalculator->calculateSpiderMoves('0,0', $board, 0);
         $this->assertCount(0, $spiderMoves, "Spider should not have any moves if completely blocked.");
     }
 

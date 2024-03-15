@@ -4,8 +4,10 @@ session_start();
 
 require_once 'vendor/autoload.php';
 use Colin\Hive\Database;
-use Colin\Hive\Game;
-use Colin\Hive\GameLogic;
+use Colin\Hive\GameController;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\MoveCalculator;
+use Colin\Hive\GameValidator;
 use Colin\Hive\GameRenderer;
 
 $host = getenv('MYSQL_HOST') ?: 'localhost';
@@ -14,9 +16,12 @@ $password = getenv('MYSQL_PASSWORD') ?: '';
 $database = getenv('MYSQL_DB') ?: 'hive';
 
 $db = new Database($host, $user, $password, $database);
-$gameLogic = new GameLogic();
-$game = new Game($db, $gameLogic);
+$gameLogic = new BaseGameLogic();
+$moveCalculator = new MoveCalculator();
+$gameValidator = new GameValidator();
+$game = new GameController($db, $gameLogic, $moveCalculator, $gameValidator);
 $gameRenderer = new GameRenderer();
+
 
 if (!isset($_SESSION['board'])) {
     $game->restart();
@@ -31,7 +36,7 @@ $player = $game->getPlayer();
 $hand = $game->getHand();
 
 // Bug fix 1
-$to = $gameLogic->calculatePositions($board, $gameLogic->getOffsets(), $player);
+$to = $moveCalculator->calculatePositions($board, $gameLogic->getOffsets(), $player);
 
 
 $moveto = [];

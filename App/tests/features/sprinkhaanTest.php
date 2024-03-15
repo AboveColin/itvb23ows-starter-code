@@ -1,15 +1,21 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Colin\Hive\GameLogic;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 
 class SprinkhaanTest extends TestCase
 {
     private $gameLogic;
+    private $gameValidator;
+    private $moveCalculator;
 
     protected function setUp(): void
     {
-        $this->gameLogic = new GameLogic();
+        $this->gameLogic = new BaseGameLogic();
+        $this->gameValidator = new GameValidator();
+        $this->moveCalculator = new MoveCalculator();
     }
 
     public function testGrasshopperCanJumpOverOneTile()
@@ -18,7 +24,7 @@ class SprinkhaanTest extends TestCase
             Test that the grasshopper can jump over one tile
         */
         $board = ['0,0' => [[0, 'G']], '0,1' => [[1, 'Q']], '-1,0' => [[0, 'Q']], '1,1' => [[1, 'B']]];
-        $isValid = $this->gameLogic->isValidGrasshopperMove('0,0', '0,2', $board);
+        $isValid = $this->moveCalculator->isValidGrasshopperMove('0,0', '0,2', $board);
         $this->assertTrue($isValid);
     }
 
@@ -28,7 +34,7 @@ class SprinkhaanTest extends TestCase
             Test that the grasshopper cannot jump to the same position
         */
         $board = ['0,0' => [[0, 'G']]];
-        $isValid = $this->gameLogic->isValidGrasshopperMove('0,0', '0,0', $board);
+        $isValid = $this->moveCalculator->isValidGrasshopperMove('0,0', '0,0', $board);
         $this->assertFalse($isValid);
     }
 
@@ -38,7 +44,7 @@ class SprinkhaanTest extends TestCase
             Test that the grasshopper must jump over at least one tile
         */
         $board = ['0,0' => [[0, 'G']], '0,2' => []]; // No tile to jump over
-        $isValid = $this->gameLogic->isValidGrasshopperMove('0,0', '0,2', $board);
+        $isValid = $this->moveCalculator->isValidGrasshopperMove('0,0', '0,2', $board);
         $this->assertFalse($isValid);
     }
 
@@ -48,7 +54,7 @@ class SprinkhaanTest extends TestCase
             Test that the grasshopper cannot land on an occupied tile
         */
         $board = ['0,0' => [[0, 'G']], '0,1' => [[1, 'B']], '0,2' => [[1, 'A']]]; // Occupied tile at '0,2'
-        $isValid = $this->gameLogic->isValidGrasshopperMove('0,0', '0,2', $board);
+        $isValid = $this->moveCalculator->isValidGrasshopperMove('0,0', '0,2', $board);
         $this->assertFalse($isValid);
     }
 
@@ -58,7 +64,7 @@ class SprinkhaanTest extends TestCase
             Test that the grasshopper cannot jump over empty fields
         */
         $board = ['0,0' => [[0, 'G']], '0,3' => []]; // Empty field at '0,1' and '0,2'
-        $isValid = $this->gameLogic->isValidGrasshopperMove('0,0', '0,3', $board);
+        $isValid = $this->moveCalculator->isValidGrasshopperMove('0,0', '0,3', $board);
         $this->assertFalse($isValid);
     }
 
