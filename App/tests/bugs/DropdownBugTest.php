@@ -6,7 +6,7 @@ use Colin\Hive\GameLogic;
 use Colin\Hive\Database;
 use PHPUnit\Framework\TestCase;
 
-class DropwndownBugTest extends TestCase
+class DropdownBugTest extends TestCase
 {
     private $game;
     private $gameRenderer;
