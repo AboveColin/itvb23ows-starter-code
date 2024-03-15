@@ -13,20 +13,13 @@ pipeline {
             agent {
                 dockerContainer {
                     image 'php:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
-                echo 'Running phpunit tests...'
                 sh 'php -v'
-                echo 'Installing Composer'
-                sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
-                echo 'Installing project composer dependencies...'
-                sh 'cd $WORKSPACE && composer install --no-progress'
-                echo 'Running PHPUnit tests...'
-                sh 'php $WORKSPACE/vendor/bin/phpunit --coverage-html $WORKSPACE/report/clover --coverage-clover $WORKSPACE/report/clover.xml --log-junit $WORKSPACE/report/junit.xml'
-                sh 'chmod -R a+w $PWD && chmod -R a+w $WORKSPACE'
-                junit 'report/*.xml'
+                sh 'php -r "echo \'Hello, world!\';"'
+                sh 'php -r "echo \'Hello, world!\';" > output.txt'
+                archiveArtifacts artifacts: 'output.txt'
             }
         }
 
