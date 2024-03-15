@@ -1,5 +1,6 @@
 pipeline {
     agent any
+    workspace = env.WORKSPACE
     stages {
 
         stage('SCM') {
@@ -12,9 +13,9 @@ pipeline {
         stage('phpunit tests') {
             steps {
                 sh 'php -v'
-                sh '{workspace}/App/vendor/phpunit/phpunit --version'
-                sh '{workspace}/App/vendor/phpunit/phpunit --configuration {workspace}/App/phpunit.xml'
-                
+                sh '${workspace}/App/vendor/phpunit/phpunit --version'
+                sh '${workspace}/App/vendor/phpunit/phpunit --configuration {workspace}/App/phpunit.xml'
+
             }
         }
 
