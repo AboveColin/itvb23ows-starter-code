@@ -3,10 +3,6 @@
 namespace Colin\Hive;
 
 class MoveCalculator extends BaseGameLogic {
-
-    public function __construct() {
-        parent::__construct();
-    }
     
     public function slide($board, $from, $to) {
         if (!$this->hasNeighBour($to, $board) || !$this->isNeighbour($from, $to)) {

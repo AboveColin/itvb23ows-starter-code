@@ -52,7 +52,7 @@ class BaseGameLogic {
     
     public function len($tile) {
         return $tile ? count($tile) : 0;
-    }    
+    }
 
     public function isValidPosition($position, $board, $player) {
         if ($this->hasNeighBour($position, $board) && $this->neighboursAreSameColor($player, $position, $board)) {

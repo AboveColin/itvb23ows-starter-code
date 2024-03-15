@@ -5,11 +5,11 @@ namespace Colin\Hive;
 use Colin\Hive\MoveCalculator;
 
 class GameValidator extends BaseGameLogic {
-    private $MoveCalculators;
+    private $moveCalculator;
 
     public function __construct() {
         parent::__construct();
-        $this->MoveCalculators = new MoveCalculator();
+        $this->moveCalculator = new MoveCalculator();
     }
 
     public function hasValidMoves($board, $hand, $player) {
@@ -19,22 +19,26 @@ class GameValidator extends BaseGameLogic {
                 foreach (array_keys($board) as $pos) {
                     if ($board[$pos][count($board[$pos]) - 1][0] == $player) {
                         if ($tile == 'A') {
-                            $calculatedMoves = $this->MoveCalculators->calculateAntMoves($pos, $board, $player);
+                            $calculatedMoves = $this->moveCalculator->calculateAntMoves(
+                                $pos, $board, $player);
                             if (!empty($calculatedMoves)) {
                                 return true;
                             }
                         } elseif ($tile == 'S') {
-                            $calculatedMoves = $this->MoveCalculators->calculateSpiderMoves($pos, $board, $player);
+                            $calculatedMoves = $this->moveCalculator->calculateSpiderMoves(
+                                $pos, $board, $player);
                             if (!empty($calculatedMoves)) {
                                 return true;
                             }
                         } elseif ($tile == 'G') {
-                            $calculatedMoves = $this->MoveCalculators->calculateGrasshopperMoves($pos, $board);
+                            $calculatedMoves = $this->moveCalculator->calculateGrasshopperMoves(
+                                $pos, $board);
                             if (!empty($calculatedMoves)) {
                                 return true;
                             }
                         } else {
-                            $calculatedMoves = $this->MoveCalculators->calculatePositions($board, $this->getOffsets(), $player);
+                            $calculatedMoves = $this->moveCalculator->calculatePositions(
+                                $board, $this->getOffsets(), $player);
                             if (!empty($calculatedMoves)) {
                                 return true;
                             }

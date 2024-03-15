@@ -78,7 +78,7 @@ class QueenBugTest extends TestCase
 
         // Initial state
         $_SESSION['board'] = [
-            '0,0' => [[0, 'Q']], 
+            '0,0' => [[0, 'Q']],
             '1,0' => [[1, 'A']],
         ];
 

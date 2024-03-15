@@ -122,19 +122,19 @@ if (!count($moveto)) {
         <hr>
         <div class="actionButtons">
             <form method="post" action="index.php">
-                <input type="hidden" name="AIMove" value="true">
+                <input area-hidden="true" name="AIMove" value="true" class="hidden">
                 <input type="submit" value="AIMove">
             </form>
             <form method="post" action="index.php">
-                <input type="hidden" name="pass" value="true">
+                <input area-hidden="true" name="pass" value="true" class="hidden">
                 <input type="submit" value="Pass">
             </form>
             <form method="post" action="index.php">
-                <input type="hidden" name="restart" value="true">
+                <input area-hidden="true" name="restart" value="true" class="hidden">
                 <input type="submit" value="Restart">
             </form>
             <form method="post" action="index.php">
-                <input type="hidden" name="undo" value="true">
+                <input area-hidden="true" name="undo" value="true" class="hidden">
                 <input type="submit" value="Undo">
             </form>
         </div>

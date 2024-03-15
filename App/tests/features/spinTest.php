@@ -34,7 +34,7 @@ class SpinTest extends TestCase {
             '0,0' => [[0, 'S']]
         ];
         $spiderMoves = $this->moveCalculator->calculateSpiderMoves('0,0', $board, 0);
-        $this->assertCount(0, $spiderMoves, 
+        $this->assertCount(0, $spiderMoves,
             "Spider should not have valid moves from starting position with no neighbors.");
     }
 
@@ -76,7 +76,7 @@ class SpinTest extends TestCase {
         ];
         $spiderMoves = $this->moveCalculator->calculateSpiderMoves('0,0', $board, 0);
         $this->assertNotContains('expected_invalid_move',
-         $spiderMoves, 
+         $spiderMoves,
          "Spider should not make a move that breaks hive connectivity.");
     }
 
