@@ -39,7 +39,7 @@ class OldPosBugTest extends TestCase {
          * ];
          */
         
-        $host = 'localhost';
+        $host = 'db';
         $user = 'root';
         $password = '123456';
         $database = 'hive';

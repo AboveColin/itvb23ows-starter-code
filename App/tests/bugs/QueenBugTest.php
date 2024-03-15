@@ -44,7 +44,7 @@ class QueenBugTest extends TestCase
          *     1 => ['A' => 2],
          * ];
          */
-        $host = 'localhost';
+        $host = 'db';
         $user = 'root';
         $password = '123456';
         $database = 'hive';

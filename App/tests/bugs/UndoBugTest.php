@@ -27,7 +27,7 @@ class UndoBugTest extends TestCase {
 
     protected function setUp(): void
     {
-        $host = 'localhost';
+        $host = 'db';
         $user = 'root';
         $password = '123456';
         $database = 'hive';
