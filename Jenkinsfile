@@ -13,6 +13,7 @@ pipeline {
             steps {
                 sh 'php -v'
                 sh 'composer --version'
+                sh 'cd App'
                 sh 'composer install'
                 sh "chmod +x ${env.WORKSPACE}/App/vendor/bin/phpunit"
                 sh "${env.WORKSPACE}/App/vendor/bin/phpunit --version"
