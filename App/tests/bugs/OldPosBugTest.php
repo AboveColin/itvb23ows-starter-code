@@ -70,6 +70,7 @@ class OldPosBugTest extends TestCase {
         $_SESSION['player'] = 0;
         $_SESSION['game_id'] = 1;
         $_SESSION['last_move'] = 1;
+        $_SESSION['turn'] = 0;
 
         // Simulate moving the Queen bee
         $this->game->move('0,0', '1,0');
