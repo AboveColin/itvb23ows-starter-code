@@ -31,15 +31,12 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            agent any
-            tools {
-                jdk 'JDK8';
-                scannerHome = tool 'OWS';
-            }
             steps {
+                script { scannerHome = tool 'OWS' }
                 withSonarQubeEnv('SonarQube') {
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
+                echo 'SonarQube analysis completed'
             }
         }
 
