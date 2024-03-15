@@ -21,7 +21,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script { scannerHome = tool 'OWS' }
-                withSonarQubeEnv('SonarQube') {
+                withSonarQubeEnv('OWS') {
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
                 echo 'SonarQube analysis completed'
