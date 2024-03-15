@@ -2,7 +2,7 @@
 namespace Colin\Hive;
 session_start();
 
-require 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
 use Colin\Hive\Database;
 use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
@@ -47,7 +47,7 @@ if (!count($moveto)) $moveto[] = '0,0';
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Hive</title>
     <link rel="stylesheet" href="/css/styling.css">

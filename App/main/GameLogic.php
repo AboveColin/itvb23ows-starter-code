@@ -13,7 +13,7 @@ class GameLogic {
         return $this->offsets;
     }
 
-    function isNeighbour($a, $b) {
+    public function isNeighbour($a, $b) {
         $a = explode(',', $a);
         $b = explode(',', $b);
         if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) return true;
@@ -22,13 +22,13 @@ class GameLogic {
         return false;
     }
     
-    function hasNeighBour($a, $board) {
+    public function hasNeighBour($a, $board) {
         foreach (array_keys($board) as $b) {
             if ($this->isNeighbour($a, $b)) return true;
         }
     }
     
-    function neighboursAreSameColor($player, $a, $board) {
+    public function neighboursAreSameColor($player, $a, $board) {
         foreach ($board as $b => $st) {
             if (!$st) continue;
             $c = $st[count($st) - 1][0];
@@ -37,11 +37,11 @@ class GameLogic {
         return true;
     }
     
-    function len($tile) {
+    private function len($tile) {
         return $tile ? count($tile) : 0;
     }
     
-    function slide($board, $from, $to) {
+    public function slide($board, $from, $to) {
         if (!$this->hasNeighBour($to, $board)) return false;
         if (!$this->isNeighbour($from, $to)) return false;
         $b = explode(',', $to);
@@ -63,7 +63,7 @@ class GameLogic {
         return min($lenCommon0, $lenCommon1) <= max($lenFrom, $lenTo);
     }
 
-    function isValidPosition($position, $board, $player) {
+    public function isValidPosition($position, $board, $player) {
         if ($this->hasNeighBour($position, $board) && $this->neighboursAreSameColor($player, $position, $board)) {
             return true;
         }
@@ -113,7 +113,7 @@ class GameLogic {
     }
 
 
-    function calculatePositions($board, $offsets, $player) {
+    public function calculatePositions($board, $offsets, $player) {
         // bug fix #1
         $validPositions = [];
     

@@ -229,15 +229,6 @@ class Game {
             $_SESSION['turn'] -= 1;
         }
     }
-    
-
-    function checkifPlayerplayedQueen($player) {
-        $hand = $_SESSION['hand'][$player];
-        if ($hand['Q'] == 0) {
-            return true;
-        }
-        return false;
-    }
 
     public function insertPlay($piece, $to) {
         $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "play", ?, ?, ?, ?)');
