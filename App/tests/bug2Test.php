@@ -38,7 +38,7 @@ class bug2Test extends TestCase
         //     0 => ['Q' => 0],
         //     1 => ['A' => 2],
         // ];
-        $host = 'localhost';
+        $host = 'db';
         $user = 'root';
         $password = '123456';
         $database = 'hive';

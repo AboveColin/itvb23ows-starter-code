@@ -31,7 +31,7 @@ class bug4Test extends TestCase {
         //     0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
         //     1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
         // ];
-        $host = 'localhost';
+        $host = 'db';
         $user = 'root';
         $password = '123456';
         $database = 'hive';
