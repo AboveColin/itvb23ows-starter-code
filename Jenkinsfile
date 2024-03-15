@@ -11,9 +11,9 @@ pipeline {
 
         stage('phpunit tests') {
             agent {
-                docker {
-                    image 'php:7.4'
-                    args '-u root:sudo'
+                dockerContainer {
+                    image 'php:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
