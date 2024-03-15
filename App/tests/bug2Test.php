@@ -7,7 +7,7 @@ use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 use PHPUnit\Framework\TestCase;
 
-class Testbug2 extends TestCase
+class bug2Test extends TestCase
 {
     /*
         2. Als wit een bijenkoningin speelt op (0, 0), en zwart op (1, 0), dan zou het een legale zet
@@ -64,8 +64,7 @@ class Testbug2 extends TestCase
         $_SESSION['last_move'] = 0;
     }
     
-
-    public function test1()
+    public function testWhiteQueenTo0_1()
     {
         /*
             Test that the white queen can be moved from (0, 0) to (0, 1)

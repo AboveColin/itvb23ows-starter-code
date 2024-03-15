@@ -16,7 +16,7 @@ pipeline {
                 sh "composer install --working-dir ${env.WORKSPACE}/App"
                 sh "chmod +x ${env.WORKSPACE}/App/vendor/bin/phpunit"
                 sh "${env.WORKSPACE}/App/vendor/bin/phpunit --version"
-                sh "${env.WORKSPACE}/App/vendor/bin/phpunit --configuration ${env.WORKSPACE}/App/phpunit.xml --verbose"
+                sh "${env.WORKSPACE}/App/vendor/bin/phpunit --configuration ${env.WORKSPACE}/App/phpunit.xml"
 
             }
         }

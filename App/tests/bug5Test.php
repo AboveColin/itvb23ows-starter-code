@@ -4,7 +4,7 @@ use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 use Colin\Hive\Database;
 
-class Testbug5 extends TestCase {
+class bug5Test extends TestCase {
     /*
     5. De undo-functionaliteit werkt nog niet goed. De oude zeAen worden nog niet
         verwijderd, en de toestand van het bord wordt niet altijd goed hersteld. Bovendien
@@ -41,7 +41,7 @@ class Testbug5 extends TestCase {
         $_SESSION['last_move'] = 0;
     }
 
-    public function test1() {
+    public function testUndoWithoutMoves() {
         /*
             Test that the undo function produces an error when there are no moves to undo
         */
@@ -60,7 +60,7 @@ class Testbug5 extends TestCase {
         $this->assertEquals('No moves to undo', $_SESSION['error']);
     }
 
-    public function test2() {
+    public function TestundoWithMoves() {
         /*
             Test that the undo function works correctly when there is a move to undo and the board is restored to the correct state
         */
