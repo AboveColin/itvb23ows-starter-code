@@ -11,10 +11,13 @@
          displayDetailsOnTestsThatTriggerWarnings="true"
          failOnWarning="false"
          colors="true">
+         
     <testsuites>
-  
-        <testsuite name="default">
-            <directory>tests</directory>
+        <testsuite name="bugs">
+            <directory>tests/bugs</directory>
+        </testsuite>
+        <testsuite name="features">
+            <directory>tests/features</directory>
         </testsuite>
     </testsuites>
 
