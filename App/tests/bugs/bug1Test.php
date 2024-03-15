@@ -1,14 +1,12 @@
 <?php
 
-require 'vendor/autoload.php';
-
 use Colin\Hive\Game;
 use Colin\Hive\GameRenderer;
 use Colin\Hive\GameLogic;
 use Colin\Hive\Database;
 use PHPUnit\Framework\TestCase;
 
-class Testbug1 extends TestCase
+class bug1Test extends TestCase
 {
     private $game;
     private $gameRenderer;
@@ -28,8 +26,7 @@ class Testbug1 extends TestCase
         $this->gameRenderer = new GameRenderer();
     }
     
-
-    public function test1()
+    public function testDisplayPiece()
     {
         /*
             Test that the displayPiece method only shows the pieces that the player has in their hand
@@ -43,7 +40,7 @@ class Testbug1 extends TestCase
         $this->assertEquals(2, substr_count($output, '<option value='));
     }
 
-    public function test2()
+    public function testCalculatePositions()
     {
         /*
             Test that the calculatePositions method only returns valid positions
@@ -58,7 +55,7 @@ class Testbug1 extends TestCase
         }
     }
 
-    public function test3()
+    public function testDisplayFrom()
     {
         /*
             Test that the displayFrom method only shows the positions that the player has pieces on

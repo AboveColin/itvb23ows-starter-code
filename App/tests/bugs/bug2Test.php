@@ -1,13 +1,11 @@
 <?php
 
-require 'vendor/autoload.php';
-
 use Colin\Hive\Database;
 use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 use PHPUnit\Framework\TestCase;
 
-class Testbug2 extends TestCase
+class bug2Test extends TestCase
 {
     /*
         2. Als wit een bijenkoningin speelt op (0, 0), en zwart op (1, 0), dan zou het een legale zet
@@ -40,7 +38,7 @@ class Testbug2 extends TestCase
         //     0 => ['Q' => 0],
         //     1 => ['A' => 2],
         // ];
-        $host = 'localhost';
+        $host = 'db';
         $user = 'root';
         $password = '123456';
         $database = 'hive';
@@ -64,8 +62,7 @@ class Testbug2 extends TestCase
         $_SESSION['last_move'] = 0;
     }
     
-
-    public function test1()
+    public function testWhiteQueenTo0_1()
     {
         /*
             Test that the white queen can be moved from (0, 0) to (0, 1)
@@ -83,6 +80,7 @@ class Testbug2 extends TestCase
             0 => ['Q' => 0],
             1 => ['A' => 2],
         ];
+        $_SESSION['turn'] = 0;
         
         $from = '0,0';
         $to = '0,1';

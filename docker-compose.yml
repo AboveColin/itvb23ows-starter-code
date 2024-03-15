@@ -43,8 +43,8 @@ services:
       - FLASK_APP=app.py
 
   jenkins:
-    build: ./Jenkins
-    image: jenkins/jenkins:lts
+    build:
+      dockerfile: Jenkins/Dockerfile
     ports:
       - "8080:8080"
       - "50000:50000"

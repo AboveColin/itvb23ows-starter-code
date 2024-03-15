@@ -3,7 +3,7 @@
 use Colin\Hive\GameLogic;
 use PHPUnit\Framework\TestCase;
 
-class TestWinCondition extends TestCase {
+class winConditionTest extends TestCase {
     private $gameLogic;
 
     protected function setUp(): void {

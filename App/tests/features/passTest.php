@@ -5,7 +5,7 @@ use Colin\Hive\GameLogic;
 use Colin\Hive\Database;
 use PHPUnit\Framework\TestCase;
 
-class TestPass extends TestCase
+class passTest extends TestCase
 {
     private $db;
     private $gameLogic;
@@ -33,6 +33,7 @@ class TestPass extends TestCase
         $_SESSION['game_id'] = 1;
         $_SESSION['last_move'] = 0;
         $_SESSION['player'] = 0;
+        $_SESSION['turn'] = 0;
 
         $game->pass();
 
@@ -52,6 +53,7 @@ class TestPass extends TestCase
         $_SESSION['last_move'] = 0;
         $_SESSION['player'] = 0;
         $_SESSION['error'] = null;
+        $_SESSION['turn'] = 0;
 
         $game->pass();
 

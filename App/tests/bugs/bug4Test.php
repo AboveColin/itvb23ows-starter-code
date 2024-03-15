@@ -5,7 +5,7 @@ use Colin\Hive\Database;
 use Colin\Hive\Game;
 use Colin\Hive\GameLogic;
 
-class Testbug4 extends TestCase {
+class bug4Test extends TestCase {
     /*
         4. Als je een steen verplaatst, kan je daarna geen nieuwe steen spelen op het oude veld,
         ook als dat volgens de regels wel zou mogen.
@@ -31,7 +31,7 @@ class Testbug4 extends TestCase {
         //     0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
         //     1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
         // ];
-        $host = 'localhost';
+        $host = 'db';
         $user = 'root';
         $password = '123456';
         $database = 'hive';
@@ -55,8 +55,7 @@ class Testbug4 extends TestCase {
         $_SESSION['last_move'] = 0;
     }
     
-
-    public function test1() {
+    public function testPieceCanBePlayedOnOldPositionOfMovedPiece() {
         /*
             Test that a piece can be played on the old position of a moved piece
         */
