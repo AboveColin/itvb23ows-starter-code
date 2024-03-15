@@ -17,27 +17,29 @@ class QueenBugTest extends TestCase
 
     protected function setUp(): void
     {
-        // $this->db = $this->createMock(Database::class);
-        
-        // // Create a mock for the statement object.
-        // $stmt = $this->createMock(mysqli_stmt::class);
-        // $stmt->method('bind_param')->willReturn(true);
-        // $stmt->method('execute')->willReturn(true);
-        // $this->db->method('prepare')->willReturn($stmt);
-        
-        // // Continue with the rest of setUp method.
-        // $this->gameLogic = new GameLogic();
-        // $this->game = new Game($this->db, $this->gameLogic);
-    
-        // $_SESSION['board'] = [
-        //     '0,0' => [[0, 'Q']],
-        //     '1,0' => [[1, 'A']],
-        // ];
-        // $_SESSION['player'] = 0;
-        // $_SESSION['hand'] = [
-        //     0 => ['Q' => 0],
-        //     1 => ['A' => 2],
-        // ];
+        /**
+         * $this->db = $this->createMock(Database::class);
+         *
+         * // Create a mock for the statement object.
+         * $stmt = $this->createMock(mysqli_stmt::class);
+         * $stmt->method('bind_param')->willReturn(true);
+         * $stmt->method('execute')->willReturn(true);
+         * $this->db->method('prepare')->willReturn($stmt);
+         *
+         * // Continue with the rest of setUp method.
+         * $this->gameLogic = new GameLogic();
+         * $this->game = new Game($this->db, $this->gameLogic);
+         *
+         * $_SESSION['board'] = [
+         *     '0,0' => [[0, 'Q']],
+         *     '1,0' => [[1, 'A']],
+         * ];
+         * $_SESSION['player'] = 0;
+         * $_SESSION['hand'] = [
+         *     0 => ['Q' => 0],
+         *     1 => ['A' => 2],
+         * ];
+         */
         $host = 'db';
         $user = 'root';
         $password = '123456';

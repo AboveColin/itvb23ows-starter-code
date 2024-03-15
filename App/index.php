@@ -173,7 +173,7 @@ if (!count($moveto)) {
                 }
             });
             for (let i = 0; i < tiles.length; i++) {
-                // only for non ghost tiles 
+                // only for non ghost tiles
                 if (tiles[i].dataset.position !== undefined) {
                     tiles[i].addEventListener('click', function() {
                         const selectedPosition = this.dataset.position;

@@ -14,10 +14,13 @@ class GameRenderer
         $innerTile = $tile[$h-1][1];
         
         // Construct the file path for the tile image
-        $imagePath = "/" . $innerTile . ".png"; 
+        $imagePath = "/" . $innerTile . ".png";
     
         // Display image and coordinates
-        echo "<div class=\"tile $playerClass $stacked\" style=\"left: {$left}em; top: {$top}em;\" data-position=\"$pos\">";
+        echo "<div class=\"tile $playerClass $stacked\"
+                style=\"left: {$left}em; top: {$top}em;\"
+                data-position=\"$pos\">";
+
         echo "<img src=\"$imagePath\" alt=\"$innerTile\" class=\"tileImage\">";
         echo "<span class=\"coordinates\">($p,$q) $innerTile</span>";
         echo "</div>";
@@ -73,7 +76,7 @@ class GameRenderer
             foreach ($hand[$player] as $tile => $ct) {
                 for ($i = 0; $i < $ct; $i++) {
                     $tile = substr($tile, 0, 1);
-                    $imagePath = "/" . $tile . ".png"; 
+                    $imagePath = "/" . $tile . ".png";
                     echo "<img src=\"$imagePath\" alt=\"$tile\" style=\"width: 25px; height: 25px;\">";
                 }
             }
@@ -126,16 +129,26 @@ class GameRenderer
         $result = $stmt->get_result();
         while ($row = $result->fetch_array()) {
             if ($row[2] == 'play') {
-                echo '<li><img src="'.htmlspecialchars($row[3]) .'.png" style="width: 15px"/> '.htmlspecialchars($row[2]).' '.htmlspecialchars($row[3]).' '.htmlspecialchars($row[4]).'</li>';
+                echo '<li><img src="'.
+                htmlspecialchars($row[3]) .'.png" style="width: 15px"/> '.
+                htmlspecialchars($row[2]).' '.
+                htmlspecialchars($row[3]).' '.
+                htmlspecialchars($row[4]).'</li>';
+
             } elseif ($row[2] == 'move') {
-                echo '<li><img src="'.htmlspecialchars($row[2]) .'.png" style="width: 15px"/> '.htmlspecialchars($row[2]).' '.htmlspecialchars($row[3]).' '.htmlspecialchars($row[4]).'</li>';
+                echo '<li><img src="'.
+                htmlspecialchars($row[2]) .'.png" style="width: 15px"/> '.
+                htmlspecialchars($row[2]).' '.
+                htmlspecialchars($row[3]).' '.
+                htmlspecialchars($row[4]).'</li>';
+
             } else {
                 echo '<li>'.htmlspecialchars($row[2]) .'</li>';
             }
-        } 
+        }
     }
 
-    private function displayAntTile($p, $q, $min_p, $min_q) {
+    private function displayMoveTile($p, $q, $min_p, $min_q) {
         $centerOffsetX = 15; // Horizontal center offset
         $centerOffsetY = 15; // Vertical center offset
         $left = ($p - $min_p) * 4 + ($q - $min_q) * 2 + $centerOffsetX;
@@ -158,17 +171,8 @@ class GameRenderer
 
         foreach ($antMoves as $pos) {
             list($p, $q) = explode(',', $pos);
-            $this->displayAntTile($p, $q, $min_p, $min_q);
+            $this->displayMoveTile($p, $q, $min_p, $min_q);
         }
-    }
-
-    private function displaySpiderTile($p, $q, $min_p, $min_q) {
-        $centerOffsetX = 15; // Horizontal center offset
-        $centerOffsetY = 15; // Vertical center offset
-        $left = ($p - $min_p) * 4 + ($q - $min_q) * 2 + $centerOffsetX;
-        $top = ($q - $min_q) * 4 + $centerOffsetY;
-
-        echo "<div class=\"tile move\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)</div>";
     }
 
     public function renderSpiderMoves($board, $gameLogic) {
@@ -185,7 +189,7 @@ class GameRenderer
 
         foreach ($spiderMoves as $pos) {
             list($p, $q) = explode(',', $pos);
-            $this->displaySpiderTile($p, $q, $min_p, $min_q);
+            $this->displayMoveTile($p, $q, $min_p, $min_q);
         }
     }
 

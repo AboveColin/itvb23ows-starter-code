@@ -169,7 +169,7 @@ class Game {
         // Continue with the pass logic if no valid moves are available
         $stmt = $this->db->prepare(
             'insert into moves
-            (game_id, type, move_from, move_to, previous_id, state) 
+            (game_id, type, move_from, move_to, previous_id, state)
             values (?, "pass", null, null, ?, ?)'
         );
         $state = $this->db->getState();
@@ -315,7 +315,7 @@ class Game {
                 break;
             case "A":
                 if (!$this->gameLogic->checkIfMoveinCalculatedArray(
-                        $to, 
+                        $to,
                         $this->gameLogic->calculateAntMoves($from, $board, $player)
                     )) {
 
@@ -326,7 +326,7 @@ class Game {
                 break;
             case "S":
                 if (!$this->gameLogic->checkIfMoveinCalculatedArray(
-                        $to, 
+                        $to,
                         $this->gameLogic->calculateSpiderMoves($from, $board, $player)
                     )) {
 

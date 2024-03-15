@@ -15,22 +15,26 @@ class OldPosBugTest extends TestCase {
     private $gameLogic;
 
     protected function setUp(): void {
-        // $this->db = $this->createMock(Database::class); 
-    
-        // $stmt = $this->createMock(mysqli_stmt::class);
-        // $stmt->method('bind_param')->willReturn(true);
-        // $stmt->method('execute')->willReturn(true);
-        // $this->db->method('prepare')->willReturn($stmt);
-    
-        // $this->gameLogic = new GameLogic();
-        // $this->game = new Game($this->db, $this->gameLogic);
-    
-        // $_SESSION['board'] = [];
-        // $_SESSION['player'] = 0;
-        // $_SESSION['hand'] = [
-        //     0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
-        //     1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
-        // ];
+        /**
+         * $this->db = $this->createMock(Database::class); 
+         *
+         *
+         * $stmt = $this->createMock(mysqli_stmt::class);
+         * $stmt->method('bind_param')->willReturn(true);
+         * $stmt->method('execute')->willReturn(true);
+         * $this->db->method('prepare')->willReturn($stmt);
+         *
+         * $this->gameLogic = new GameLogic();
+         * $this->game = new Game($this->db, $this->gameLogic);
+         *
+         * $_SESSION['board'] = [];
+         * $_SESSION['player'] = 0;
+         * $_SESSION['hand'] = [
+         *     0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
+         *     1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
+         * ];
+         */
+        
         $host = 'db';
         $user = 'root';
         $password = '123456';
@@ -74,14 +78,17 @@ class OldPosBugTest extends TestCase {
 
         // Simulate moving the Queen bee
         $this->game->move('0,0', '1,0');
-        $this->assertNull($_SESSION['error'], "No error expected when moving the Queen bee");
+        $this->assertNull($_SESSION['error'],
+            "No error expected when moving the Queen bee");
 
         // Attempt to play a new piece on the old position of the Queen bee
         $this->game->play('A', '0,0');
 
         // Assert that playing a new piece on the old position is successful
-        $this->assertArrayHasKey('0,0', $_SESSION['board'], "Board should contain the new piece at 0,0");
-        $this->assertNull($_SESSION['error'], "Expected to successfully place a new piece where the Queen bee was previously");   
+        $this->assertArrayHasKey('0,0', $_SESSION['board'],
+            "Board should contain the new piece at 0,0");
+        $this->assertNull($_SESSION['error'],
+            "Expected to successfully place a new piece where the Queen bee was previously");
     }
 
     protected function tearDown(): void

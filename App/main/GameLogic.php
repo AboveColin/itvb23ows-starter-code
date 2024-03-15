@@ -14,25 +14,38 @@ class GameLogic {
     }
 
     public function isNeighbour($a, $b) {
+        $returnvar = false;
         $a = explode(',', $a);
         $b = explode(',', $b);
-        if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) return true;
-        if ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1) return true;
-        if ($a[0] + $a[1] == $b[0] + $b[1]) return true;
-        return false;
+        if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) {
+            $returnvar = true;
+        }
+        if ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1) {
+            $returnvar = true;
+        }
+        if ($a[0] + $a[1] == $b[0] + $b[1]) {
+            $returnvar = true;
+        }
+        return $returnvar;
     }
     
     public function hasNeighBour($a, $board) {
         foreach (array_keys($board) as $b) {
-            if ($this->isNeighbour($a, $b)) return true;
+            if ($this->isNeighbour($a, $b)) {
+                return true;
+            }
         }
     }
     
     public function neighboursAreSameColor($player, $a, $board) {
         foreach ($board as $b => $st) {
-            if (!$st) continue;
+            if (!$st) {
+                continue;
+            }
             $c = $st[count($st) - 1][0];
-            if ($c != $player && $this->isNeighbour($a, $b)) return false;
+            if ($c != $player && $this->isNeighbour($a, $b)) {
+                return false;
+            }
         }
         return true;
     }
@@ -208,7 +221,7 @@ class GameLogic {
                         // If it has already jumped and finds an empty space, the move is valid
                         $isValid = true;
                     } else {
-                        // If it hasn't jumped yet, the move is invalid
+                        // If it hasnt jumped yet, the move is invalid
                         $isValid = false;
                     }
                     break;
@@ -222,11 +235,15 @@ class GameLogic {
     }
     
 
-    public function calculateGrasshopperMoves($from, $board, $player) {
+    public function calculateGrasshopperMoves($from, $board) {
         $validMoves = [];
         foreach (array_keys($board) as $pos) {
             for ($i = 0; $i < 6; $i++) {
-                $newPos = (explode(',', $pos)[0] + $this->getOffsets()[$i][0]) . ',' . (explode(',', $pos)[1] + $this->getOffsets()[$i][1]);
+                $newPos =
+                (explode(',', $pos)[0] + $this->getOffsets()[$i][0])
+                    . ',' . 
+                (explode(',', $pos)[1] + $this->getOffsets()[$i][1]);
+
                 if ($this->isValidGrasshopperMove($from, $newPos, $board)) {
                     $validMoves[] = $newPos;
                 }
@@ -258,7 +275,8 @@ class GameLogic {
                     unset($tempBoard[$from]);
                     $tempBoard[$newPos] = [[$player, 'A']]; // Simulate moving the ant to the new position
                     
-                    if ($this->isHiveConnected($tempBoard)) { // Ensure the hive remains connected after the simulated move
+                    // Ensure the hive remains connected after the simulated move
+                    if ($this->isHiveConnected($tempBoard)) { 
                         $validMoves[] = $newPos;
                         $visited[$newPos] = true;
                         $queue->enqueue($newPos);
@@ -348,7 +366,7 @@ class GameLogic {
                                 return true;
                             }
                         } elseif ($tile == 'G') {
-                            $calculatedMoves = $this->calculateGrasshopperMoves($pos, $board, $player);
+                            $calculatedMoves = $this->calculateGrasshopperMoves($pos, $board);
                             if (!empty($calculatedMoves)) {
                                 return true;
                             }
