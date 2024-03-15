@@ -10,11 +10,6 @@ pipeline {
         }
 
         stage('phpunit tests') {
-            agent {
-                dockerContainer {
-                    image 'php:latest'
-                }
-            }
             steps {
                 sh 'php -v'
                 sh 'php -r "echo \'Hello, world!\';"'
