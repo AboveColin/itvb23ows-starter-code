@@ -1,6 +1,5 @@
 pipeline {
     agent any
-    workspace = env.WORKSPACE
     stages {
 
         stage('SCM') {
