@@ -12,9 +12,9 @@ pipeline {
         stage('phpunit tests') {
             steps {
                 sh 'php -v'
-                sh 'php -r "echo \'Hello, world!\';"'
-                sh 'php -r "echo \'Hello, world!\';" > output.txt'
-                archiveArtifacts artifacts: 'output.txt'
+                sh '{workspace}/App/vendor/phpunit/phpunit --version'
+                sh '{workspace}/App/vendor/phpunit/phpunit --configuration {workspace}/App/phpunit.xml'
+                
             }
         }
 
