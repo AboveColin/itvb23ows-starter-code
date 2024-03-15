@@ -7,7 +7,7 @@ use mysqli;
 class Database {
     private $connection;
 
-    public function get_state() {
+    public function getState() {
         return serialize([$_SESSION['hand'], $_SESSION['board'], $_SESSION['player']]);
     }
 
@@ -15,11 +15,11 @@ class Database {
         return $this->connection->prepare($sql);
     }
 
-    public function insert_id() {
+    public function insertId() {
         return $this->connection->insert_id;
     }
     
-    public function set_state($state) {
+    public function setState($state) {
         list($hand, $board, $player) = unserialize($state);
         $_SESSION['hand'] = $hand;
         $_SESSION['board'] = $board;
@@ -35,3 +35,5 @@ class Database {
     }
 
 }
+
+?>

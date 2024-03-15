@@ -42,17 +42,24 @@ class GameLogic {
     }
     
     public function slide($board, $from, $to) {
-        if (!$this->hasNeighBour($to, $board)) return false;
-        if (!$this->isNeighbour($from, $to)) return false;
+        if (!$this->hasNeighBour($to, $board) || !$this->isNeighbour($from, $to)) {
+            return false;
+        }
+
         $b = explode(',', $to);
         $common = [];
         foreach ($this->offsets as $pq) {
             $p = $b[0] + $pq[0];
             $q = $b[1] + $pq[1];
-            if ($this->isNeighbour($from, "$p,$q")) $common[] = "$p,$q";
+            if ($this->isNeighbour($from, "$p,$q")) { 
+                $common[] = "$p,$q";
+            }
+                
         }
     
-        if (count($common) < 2) return false;
+        if (count($common) < 2)  {
+            return false;
+        }
     
         $lenCommon0 = isset($board[$common[0]]) ? $this->len($board[$common[0]]) : 0;
         $lenCommon1 = isset($board[$common[1]]) ? $this->len($board[$common[1]]) : 0;
@@ -116,31 +123,48 @@ class GameLogic {
     public function calculatePositions($board, $offsets, $player) {
         // bug fix #1
         $validPositions = [];
+
+        if ($this->isInitialMove($board)) {
+            $validPositions = $this->calculateInitialPositions($offsets, $board);
+        } else {
+            // For moves after the second, calculate valid positions based on existing logic
+            $validPositions = $this->calculateSubsequentPositions($board, $offsets, $player);
+        }
     
-        if (count($board) == 1 && isset($board['0,0'])) {
+        if (empty($validPositions)) {
+            $validPositions[] = '0,0'; 
+        }
+    
+        return array_unique($validPositions);
+    }
+    
+    private function isInitialMove($board) {
+        return count($board) == 1 && isset($board['0,0']);
+    }
+
+    private function calculateInitialPositions($offsets, $board) {
+        $validPositions = [];
+        foreach ($offsets as $offset) {
+            $newPos = $offset[0] . ',' . $offset[1];
+            if (!array_key_exists($newPos, $board)) {
+                $validPositions[] = $newPos;
+            }
+        }
+        return $validPositions;
+    }
+
+    private function calculateSubsequentPositions($board, $offsets, $player) {
+        $validPositions = [];
+        foreach (array_keys($board) as $pos) {
+            list($p, $q) = explode(',', $pos);
             foreach ($offsets as $offset) {
-                $newPos = $offset[0] . ',' . $offset[1];
-                if (!array_key_exists($newPos, $board)) {
+                $newPos = ($p + $offset[0]) . ',' . ($q + $offset[1]);
+                if (!array_key_exists($newPos, $board) && $this->isValidPosition($newPos, $board, $player)) {
                     $validPositions[] = $newPos;
                 }
             }
-        } else {
-            // For moves after the second, calculate valid positions based on existing logic
-            foreach (array_keys($board) as $pos) {
-                list($p, $q) = explode(',', $pos);
-                foreach ($offsets as $offset) {
-                    $newPos = ($p + $offset[0]) . ',' . ($q + $offset[1]);
-                    if (!array_key_exists($newPos, $board) && $this->isValidPosition($newPos, $board, $player)) {
-                        $validPositions[] = $newPos;
-                    }
-                }
-            }
         }
-
-        // eerste zet
-        if (empty($validPositions)) $validPositions[] = '0,0';
-    
-        return array_unique($validPositions);
+        return $validPositions;
     }
 
     private function gcd($a, $b) {
@@ -149,50 +173,54 @@ class GameLogic {
     }
 
     public function isValidGrasshopperMove($from, $to, $board) : bool {
-        if ($from === $to) {
-            return false; // Een sprinkhaan mag zich niet verplaatsen naar het veld waar hij al staat.
-        }
-
-        $fromCoords = explode(',', $from);
-        $toCoords = explode(',', $to);
-        $direction = [$toCoords[0] - $fromCoords[0], $toCoords[1] - $fromCoords[1]];
-
-        // Check for straight line movement
-        $gcd = $this->gcd(abs($direction[0]), abs($direction[1]));
-        if ($gcd !== 0) {
-            $direction[0] /= $gcd;
-            $direction[1] /= $gcd;
-        }
-
-        $currentPosition = $fromCoords;
-        $hasJumped = false;
-        while (true) {
-            $currentPosition[0] += $direction[0];
-            $currentPosition[1] += $direction[1];
-            $currentPosKey = implode(',', $currentPosition);
-
-            if (!isset($board[$currentPosKey])) {
-                if ($hasJumped) { 
-                    // Een sprinkhaan mag niet over lege velden springen. Dit betekent dat alle
-                    // velden tussen de start- en eindpositie bezet moeten zijn. 
-                    return $currentPosKey === $to;
+        $isValid = false; // Initialize the validity of the move as false
+        
+        if ($from !== $to) {
+            $fromCoords = explode(',', $from);
+            $toCoords = explode(',', $to);
+            $direction = [$toCoords[0] - $fromCoords[0], $toCoords[1] - $fromCoords[1]];
+    
+            // Check for straight line movement
+            $gcd = $this->gcd(abs($direction[0]), abs($direction[1]));
+            if ($gcd !== 0) {
+                $direction[0] /= $gcd;
+                $direction[1] /= $gcd;
+            }
+    
+            $currentPosition = $fromCoords;
+            $hasJumped = false;
+            while (true) {
+                $currentPosition[0] += $direction[0];
+                $currentPosition[1] += $direction[1];
+                $currentPosKey = implode(',', $currentPosition);
+    
+                if ($currentPosKey === $to) {
+                    if ($hasJumped && isset($board[$currentPosKey])) {
+                        // Invalid if the destination is occupied
+                        $isValid = false;
+                    } else {
+                        // Valid if it has jumped and the destination is not occupied
+                        $isValid = $hasJumped;
+                    }
+                    break;
+                } else if (!isset($board[$currentPosKey])) {
+                    if ($hasJumped) {
+                        // If it has already jumped and finds an empty space, the move is valid
+                        $isValid = true;
+                    } else {
+                        // If it hasn't jumped yet, the move is invalid
+                        $isValid = false;
+                    }
+                    break;
                 } else {
-                    //Een sprinkhaan moet over minimaal één steen springen. 
-                    return false;
+                    $hasJumped = true; // Mark that it has jumped over a stone
                 }
-            } else {
-                $hasJumped = true; 
-                // Een sprinkhaan verplaatst zich door in een rechte lijn een sprong te maken 
-                // naar een veld meteen achter een andere steen in de richting van de sprong.
-            }
-
-            if ($currentPosKey === $to) {
-                return false; 
-                //Een sprinkhaan mag niet naar een bezet veld springen.
             }
         }
-        return false;
+    
+        return $isValid;
     }
+    
 
     public function calculateGrasshopperMoves($from, $board, $player) {
         $validMoves = [];
@@ -216,7 +244,10 @@ class GameLogic {
         while (!$queue->isEmpty()) {
             $currentPosition = $queue->dequeue();
             foreach ($this->getOffsets() as $offset) {
-                $newPos = (explode(',', $currentPosition)[0] + $offset[0]) . ',' . (explode(',', $currentPosition)[1] + $offset[1]);
+                $newPos = (
+                        explode(',', $currentPosition)[0] + $offset[0]) . ',' . 
+                    (
+                        explode(',', $currentPosition)[1] + $offset[1]);
                 
                 if (!isset($board[$newPos]) && // Check if the new position is empty
                     !isset($visited[$newPos]) && // Check if the position hasn't been visited
@@ -277,7 +308,9 @@ class GameLogic {
         
         foreach ($this->getOffsets() as $offset) {
             $newPos = (explode(',', $currentPos)[0] + $offset[0]) . ',' . (explode(',', $currentPos)[1] + $offset[1]);
-            if (!isset($visited[$newPos]) && $this->slide($board, $currentPos, $newPos) && $this->isAdjacentToAtLeastOneTile($newPos, $board)) {
+            if (!isset($visited[$newPos]) 
+                && $this->slide($board, $currentPos, $newPos) 
+                && $this->isAdjacentToAtLeastOneTile($newPos, $board)) {
                 // Recursief de mogelijke zetten van de spin berekenen
                 $this->dfsSpider($newPos, $board, $player, $depth + 1, $visited, $validMoves);
             }

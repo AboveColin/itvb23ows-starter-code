@@ -50,7 +50,7 @@ class bug4Test extends TestCase {
         ];
 
         $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insert_id();
+        $_SESSION['game_id'] = $this->db->insertId();
 
         $_SESSION['last_move'] = 0;
     }

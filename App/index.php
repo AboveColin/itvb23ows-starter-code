@@ -43,7 +43,9 @@ foreach ($gameLogic->getOffsets() as $pq) {
 }
 
 $moveto = array_unique($moveto);
-if (!count($moveto)) $moveto[] = '0,0';
+if (!count($moveto)) {
+    $moveto[] = '0,0';
+};
 
 ?>
 <!DOCTYPE html>
@@ -63,18 +65,18 @@ if (!count($moveto)) $moveto[] = '0,0';
             <?php $gameRenderer->renderBoard($board); ?>
         </div>
     <div class="hand">White:
-        <?php 
-            $gameRenderer->renderHand($hand, 0); 
+        <?php
+            $gameRenderer->renderHand($hand, 0);
         ?>
     </div>
-    <div class="hand">Black: 
-        <?php 
-            $gameRenderer->renderHand($hand, 1); 
+    <div class="hand">Black:
+        <?php
+            $gameRenderer->renderHand($hand, 1);
         ?>
     </div>
-    <div class="turn">Turn: 
-        <?php 
-            $gameRenderer->displayTurn($player); 
+    <div class="turn">Turn:
+        <?php
+            $gameRenderer->displayTurn($player);
         ?>
     </div>
         <form method="post" action="index.php" name="GameAction">

@@ -81,7 +81,7 @@ class GameRenderer
     }
     
     public function renderHand($hand, $player) {
-        echo $this->getPlayerTiles($hand, $player);
+        $this->getPlayerTiles($hand, $player);
     }
     
     public function displayTurn($player) {

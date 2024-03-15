@@ -10,8 +10,8 @@ class Game {
     private $board;
     private $player;
     private $hand;
-    private $game_id;
-    private $last_move;
+    private $gameID;
+    private $lastMove;
     private $error;
     private $turn;
 
@@ -30,8 +30,8 @@ class Game {
 
         $this->player = $_SESSION['player'];
         $this->hand = $_SESSION['hand'];
-        $this->game_id = $_SESSION['game_id'];
-        $this->last_move = $_SESSION['last_move'] ?? 0;
+        $this->gameID = $_SESSION['game_id'];
+        $this->lastMove = $_SESSION['last_move'] ?? 0;
         $this->error = $_SESSION['error'] ?? null;
         $this->turn = $_SESSION['turn'] ?? 0;
     }
@@ -39,50 +39,19 @@ class Game {
     public function getBoard() {
         return $this->board;
     }
-
-    public function setBoard($board) {
-        $this->board = $board;
-    }
-
-    public function addToBoard($to, $piece) {
-        $this->board[$to] = $piece;
-    }
-
     public function getPlayer() {
         return $this->player;
-    }
-
-    public function setPlayer($player) {
-        $this->player = $player;
     }
 
     public function getHand() {
         return $this->hand;
     }
 
-    public function setHand($hand, $player) {
-        $this->hand[$player] = $hand;
-    }
-
-    public function getGameId() {
-        return $this->game_id;
-    }
-
-    public function getLastMove() {
-        return $this->last_move;
-    }
-
-    public function getError() {
-        return $this->error;
-    }
-
-    public function setError($error) {
-        $this->error = null;
-    }
-
     public function handlePostRequests() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             switch($_POST) {
+                default:
+                    break;
                 case isset($_POST['piece']) && isset($_POST['to']):
                     $this->play($_POST['piece'], $_POST['to']);
                     break;
@@ -99,7 +68,7 @@ class Game {
                     $this->pass();
                     break;
                 case isset($_POST['AIMove']):
-                    $this->AIMove();
+                    $this->aiMove();
                     break;
             }
             header('Location: ' . $_SERVER['PHP_SELF']);
@@ -107,7 +76,7 @@ class Game {
         }
     }
 
-    public function AIMove() {
+    public function aiMove() {
 
         $url = 'http://ai:5000/';
         $data = [
@@ -165,7 +134,20 @@ class Game {
     public function restart() {
 
         $_SESSION['board'] = [];
-        $_SESSION['hand'] = [0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3], 1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]];
+        $_SESSION['hand'] = [0 => [
+            "Q" => 1, 
+            "B" => 2, 
+            "S" => 2, 
+            "A" => 3, 
+            "G" => 3
+        ], 
+        1 => [
+            "Q" => 1, 
+            "B" => 2, 
+            "S" => 2, 
+            "A" => 3, 
+            "G" => 3
+        ]];
         $_SESSION['player'] = 0;
         $_SESSION['game_over'] = false;
         $_SESSION['winner'] = null;
@@ -173,7 +155,7 @@ class Game {
 
 
         $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insert_id();
+        $_SESSION['game_id'] = $this->db->insertId();
     }
 
     
@@ -185,11 +167,13 @@ class Game {
         }
 
         // Continue with the pass logic if no valid moves are available
-        $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "pass", null, null, ?, ?)');
-        $state = $this->db->get_state();
+        $stmt = $this->db->prepare(
+            'insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "pass", null, null, ?, ?)'
+        );
+        $state = $this->db->getState();
         $stmt->bind_param('iis', $_SESSION['game_id'], $_SESSION['last_move'], $state);
         $stmt->execute();
-        $_SESSION['last_move'] = $this->db->insert_id();
+        $_SESSION['last_move'] = $this->db->insertId();
         $_SESSION['player'] = 1 - $_SESSION['player'];
         $_SESSION['turn'] += 1;
     }
@@ -231,11 +215,13 @@ class Game {
     }
 
     public function insertPlay($piece, $to) {
-        $stmt = $this->db->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "play", ?, ?, ?, ?)');
-        $state = $this->db->get_state();
+        $stmt = $this->db->prepare(
+            'insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "play", ?, ?, ?, ?)'
+        );
+        $state = $this->db->getState();
         $stmt->bind_param('issis', $_SESSION['game_id'], $piece, $to, $_SESSION['last_move'], $state);
         $stmt->execute();
-        $_SESSION['last_move'] = $this->db->insert_id();
+        $_SESSION['last_move'] = $this->db->insertId();
     }
 
     public function play($piece, $to) {
@@ -244,13 +230,12 @@ class Game {
         $board = $_SESSION['board'];
         $hand = $_SESSION['hand'][$player];
 
-        if (!$hand[$piece])
+        if (!$hand[$piece]) {
             $_SESSION['error'] = "Player does not have tile";
-        elseif (isset($board[$to]))
+        } elseif (isset($board[$to])) {
             $_SESSION['error'] = 'Board position is not empty';
-        
-        // Must play queen bee by the fourth move bug fix
-        elseif (array_sum($hand) == 8 && $hand['Q']) {
+        } elseif (array_sum($hand) == 8 && $hand['Q']) {
+            // Must play queen bee by the fourth move bug fix
             if ($piece != 'Q') {
                 $_SESSION['error'] = 'Must play queen bee by the fourth move'; #bug fix 3
             } else {
@@ -261,13 +246,11 @@ class Game {
                 $this->checkGameEnd();
                 $_SESSION['turn'] += 1;
             }
-        }
-           
-        elseif (count($board) && !$this->gameLogic->hasNeighBour($to, $board))
+        } elseif (count($board) && !$this->gameLogic->hasNeighBour($to, $board)) {
             $_SESSION['error'] = "board position has no neighbour";
-        elseif (array_sum($hand) < 11 && !$this->gameLogic->neighboursAreSameColor($player, $to, $board))
-            $_SESSION['error'] = "Board position has opposing neighbour, trying to move from: " . $to . " with " . $piece . " sc: " . " sum: " . array_sum($hand);
-        elseif (array_sum($hand) <= 8 && $hand['Q']) {
+        } elseif (array_sum($hand) < 11 && !$this->gameLogic->neighboursAreSameColor($player, $to, $board)) {
+            $_SESSION['error'] = "Board position has opposing neighbour";
+        } elseif (array_sum($hand) <= 8 && $hand['Q']) {
             $_SESSION['error'] = 'Must play queen bee';
         } else {
             $_SESSION['board'][$to] = [[$_SESSION['player'], $piece]];
@@ -282,13 +265,15 @@ class Game {
     private function insertMove($from, $to) {
         $gameId = $_SESSION['game_id'];
         $previousId = $_SESSION['last_move'];
-        $state = $this->db->get_state();
+        $state = $this->db->getState();
         
-        $query = 'INSERT INTO moves (game_id, type, move_from, move_to, previous_id, state) VALUES (?, "move", ?, ?, ?, ?)';
+        $query = 'INSERT INTO moves (game_id, type, move_from, move_to, previous_id, state) 
+                VALUES (?, "move", ?, ?, ?, ?)';
+                
         $stmt = $this->db->prepare($query);
         $stmt->bind_param('issis', $gameId, $from, $to, $previousId, $state);
         $stmt->execute();
-        $_SESSION['last_move'] = $this->db->insert_id();
+        $_SESSION['last_move'] = $this->db->insertId();
     }
 
 
@@ -314,28 +299,32 @@ class Game {
             $_SESSION['error'] = "Queen bee is not played";
             return;
         }
-        
-        // Simulate the move and check if it's valid
+
         $tile = array_pop($board[$from]);
         $this->board[$to][] = $tile;
 
-        // grasshopper move validation
-        if ($tile[1] === "G" && !$this->gameLogic->isValidGrasshopperMove($from, $to, $board)) {
-            $_SESSION['error'] = "Invalid grasshopper move";
-            $board[$from][] = $tile; // Return the tile to its original position
-            return;
-        }
-
-        if ($tile[1] === "A" && !$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateAntMoves($from, $board, $player))) {
-            $_SESSION['error'] = "Invalid ant move";
-            $board[$from][] = $tile; // Return the tile to its original position
-            return;
-        }
-
-        if ($tile[1] === "S" && !$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateSpiderMoves($from, $board, $player))) {
-            $_SESSION['error'] = "Invalid spider move";
-            $board[$from][] = $tile; // Return the tile to its original position
-            return;
+        switch($tile[1]) {
+            case "G":
+                if (!$this->gameLogic->isValidGrasshopperMove($from, $to, $board)) {
+                    $_SESSION['error'] = "Invalid grasshopper move";
+                    $board[$from][] = $tile; // Return the tile to its original position
+                    return;
+                }
+                break;
+            case "A":
+                if (!$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateAntMoves($from, $board, $player))) {
+                    $_SESSION['error'] = "Invalid ant move";
+                    $board[$from][] = $tile; // Return the tile to its original position
+                    return;
+                }
+                break;
+            case "S":
+                if (!$this->gameLogic->checkIfMoveinCalculatedArray($to, $this->gameLogic->calculateSpiderMoves($from, $board, $player))) {
+                    $_SESSION['error'] = "Invalid spider move";
+                    $board[$from][] = $tile; // Return the tile to its original position
+                    return;
+                }
+                break;
         }
 
         // hive connected validation
@@ -348,13 +337,11 @@ class Game {
         if (!$this->gameLogic->isHiveConnected($tempBoard)) {
             $_SESSION['error'] = "Move would split hive";
             $board[$from][] = $tile; // Return the tile to its original position
-            return;
         }
 
         if (!$this->gameLogic->hasNeighbour($to, $board)) {
             $_SESSION['error'] = "Move would split hive";
             $board[$from][] = $tile; // Return the tile to its original position
-            return;
         }
         
         
@@ -409,3 +396,5 @@ class Game {
         $_SESSION['game_over'] = false;
     }
 }
+
+?>

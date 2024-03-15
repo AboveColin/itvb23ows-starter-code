@@ -10,7 +10,7 @@ services:
     environment:
       - MYSQL_HOST=db
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=123456
+      - MYSQL_PASSWORD=
       - MYSQL_DB=hive
     networks:
     - default
@@ -22,7 +22,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_ROOT_PASSWORD=
       - MYSQL_DATABASE=hive
     volumes:
       - db_data:/var/lib/mysql
@@ -50,7 +50,7 @@ services:
       - "50000:50000"
     environment:
       JENKINS_ADMIN_ID: root
-      JENKINS_ADMIN_PASSWORD: root
+      JENKINS_ADMIN_PASSWORD:
       JENKIN_PORT: 8080
     networks:
     - default
