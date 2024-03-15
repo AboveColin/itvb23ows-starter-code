@@ -4,3 +4,4 @@ game/
 old/
 App/vendor/bin/.phpunit.result.cache
 App/tests/manualTest.php
+vendor/
