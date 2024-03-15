@@ -12,6 +12,7 @@ pipeline {
         stage('phpunit tests') {
             steps {
                 sh 'php -v'
+                sh "chmod +x ${env.WORKSPACE}/App/vendor/phpunit/phpunit"
                 sh "${env.WORKSPACE}/App/vendor/phpunit/phpunit --version"
                 sh "${env.WORKSPACE}/App/vendor/phpunit/phpunit --configuration ${env.WORKSPACE}/App/phpunit.xml"
 
