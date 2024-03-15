@@ -12,11 +12,9 @@ pipeline {
         stage('phpunit tests') {
             steps {
                 sh 'php -v'
-                sh 'composer --version'
-                sh 'cd App && composer install'
-                sh "chmod +x ${env.WORKSPACE}/App/vendor/phpunit/phpunit"
-                sh "${env.WORKSPACE}/App/vendor/phpunit/phpunit --version"
-                sh "${env.WORKSPACE}/App/vendor/phpunit/phpunit --configuration ${env.WORKSPACE}/App/phpunit.xml"
+                sh "chmod +x ${env.WORKSPACE}/App/vendor/bin/phpunit"
+                sh "${env.WORKSPACE}/App/vendor/bin/phpunit --version"
+                sh "${env.WORKSPACE}/App/vendor/bin/phpunit --configuration ${env.WORKSPACE}/App/phpunit.xml"
 
             }
         }
