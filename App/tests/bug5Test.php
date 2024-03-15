@@ -17,7 +17,7 @@ class bug5Test extends TestCase {
 
     protected function setUp(): void
     {
-        $host = 'db';
+        $host = 'localhost';
         $user = 'root';
         $password = '123456';
         $database = 'hive';

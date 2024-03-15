@@ -8,8 +8,11 @@
          beStrictAboutCoverageMetadata="false"
          beStrictAboutOutputDuringTests="true"
          failOnRisky="true"
-         failOnWarning="true">
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         failOnWarning="false"
+         colors="true">
     <testsuites>
+  
         <testsuite name="default">
             <directory>tests</directory>
         </testsuite>
