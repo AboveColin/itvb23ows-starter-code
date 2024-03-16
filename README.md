@@ -9,7 +9,7 @@ Voordat je begint, zorg ervoor dat Docker en Docker Compose geïnstalleerd zijn 
 ## Configuratie
 1. Clone de AI-code naar de `AI` map in je projectdirectory.
 2. Stel het MySQL-wachtwoord in het `docker-compose.yml` bestand in. Dit moet zowel onder de `app` als onder de `db` service gedaan worden.
-3. Controleer of de hostname en poort voor de AI-service correct zijn ingesteld volgens je wensen. Pas deze indien nodig aan.
+3. Controleer of de hostname en poort voor de AI-service correct zijn ingesteld. Pas deze indien nodig aan.
 
 ## Opstarten
 Om de services te starten, open je een terminal in de projectdirectory en voer je het volgende commando uit:
