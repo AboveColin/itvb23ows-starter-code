@@ -4,7 +4,7 @@
 Dit project is opgezet met Docker-compose en omvat meerdere services, waaronder een applicatie server, een database server (MySQL), een AI-service, Jenkins voor continuous integration en delivery, en SonarQube voor codekwaliteit analyse.
 
 ## Vereisten
-Voordat je begint, zorg ervoor dat Docker en Docker Compose geïnstalleerd zijn op je systeem. Daarnaast moet de AI-code gekloond worden van de volgende Git repository: [https://github.com/AboveColin/itvb23ows-hive-ai](https://github.com/AboveColin/itvb23ows-hive-ai/tree/1b6b46f8b440415542e803271b5fb09c01fa44e8).
+Voordat je begint, zorg ervoor dat Docker en Docker Compose geïnstalleerd zijn op je systeem. Daarnaast moet de AI-code gekloond worden van de volgende Git repository: [https://github.com/AboveColin/itvb23ows-hive-ai](https://github.com/AboveColin/itvb23ows-hive-ai).
 
 ## Configuratie
 1. Clone de AI-code naar de `AI` map in je projectdirectory.
