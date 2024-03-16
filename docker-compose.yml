@@ -2,16 +2,18 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build: app/
     ports:
       - "8000:80"
     depends_on:
       - db
     environment:
-      - MYSQL_HOST=db
+      - MYSQL_HOST=ows-db-1
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=
+      - MYSQL_PASSWORD=<uw_wachtwoord>
       - MYSQL_DB=hive
+      - AI_HOST=ows-ai-1
+      - AI_PORT=5001
     networks:
     - default
     volumes:
@@ -22,8 +24,9 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=<uw_wachtwoord>
       - MYSQL_DATABASE=hive
+      - MYSQL_USER=root
     volumes:
       - db_data:/var/lib/mysql
       - ./Database/hive.sql:/docker-entrypoint-initdb.d/hive.sql
@@ -33,7 +36,7 @@ services:
   ai:
     build: ./AI
     ports:
-      - "5000:5000"
+      - "5001:5000"
     networks:
     - default
     volumes:
@@ -49,8 +52,6 @@ services:
       - "8080:8080"
       - "50000:50000"
     environment:
-      JENKINS_ADMIN_ID: root
-      JENKINS_ADMIN_PASSWORD:
       JENKIN_PORT: 8080
     networks:
     - default

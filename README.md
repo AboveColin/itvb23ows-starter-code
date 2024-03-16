@@ -1,23 +1,29 @@
-# ITVB23OWS Development Pipelines starter code
+# OWS Project
 
-This repository contains starter code for the course ITVB23OWS Development pipelines,
-which is part of the HBO-ICT program at Hanze University of Applied Sciences in
-Groningen.
+## Overzicht
+Dit project is opgezet met Docker-compose en omvat meerdere services, waaronder een applicatie server, een database server (MySQL), een AI-service, Jenkins voor continuous integration en delivery, en SonarQube voor codekwaliteit analyse.
 
-This is a deliberately poor software project, containing bugs and missing features. It
-is not intended as a demonstration of proper software engineering techniques.
+## Vereisten
+Voordat je begint, zorg ervoor dat Docker en Docker Compose geïnstalleerd zijn op je systeem. Daarnaast moet de AI-code gekloond worden van de volgende Git repository: [https://github.com/AboveColin/itvb23ows-hive-ai](https://github.com/AboveColin/itvb23ows-hive-ai/tree/1b6b46f8b440415542e803271b5fb09c01fa44e8).
 
-The application contains PHP 8.3.1 code and should run using the built-in PHP server,
-which can be started using the following command.
+## Configuratie
+1. Clone de AI-code naar de `AI` map in je projectdirectory.
+2. Stel het MySQL-wachtwoord in het `docker-compose.yml` bestand in. Dit moet zowel onder de `app` als onder de `db` service gedaan worden.
+3. Controleer of de hostname en poort voor de AI-service correct zijn ingesteld volgens je wensen. Pas deze indien nodig aan.
 
+## Opstarten
+Om de services te starten, open je een terminal in de projectdirectory en voer je het volgende commando uit:
+```bash
+docker compose up -d
 ```
-php -S localhost:8000
-```
 
-In addition to PHP 8.3.1 or higher, the code requires the mysqli extension and a MySQL
-or compatible server. The application assumes a root user without password, and tries
-to access the database `hive`. The file `hive.sql` contains the database schema.
+## Diensten
+- App: Een webapplicatie draaiend op poort 8000.
+- DB: Een MySQL-database beschikbaar op poort 3306.
+- AI: Een AI-service beschikbaar op poort 5001.
+- Jenkins: Een Jenkins-server beschikbaar op poort 8080 voor CI/CD.
+- SonarQube: Een SonarQube server op poort 9000 voor codeanalyse.
 
-This application is licensed under the MIT license, see `LICENSE.md`. Questions
-and comments can be directed to
-[Ralf van den Broek](https://github.com/ralfvandenbroek).
+## Opslag
+Docker volumes worden gebruikt voor het persistent maken van data voor MySQL, Jenkins en SonarQube. Deze volumes worden automatisch aangemaakt bij het starten van de services.
+

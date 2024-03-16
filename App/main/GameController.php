@@ -83,7 +83,7 @@ class GameController {
 
     public function aiMove() {
 
-        $url = 'http://ai:5000/';
+        $url = 'http://' . getenv('AI_HOST') . getenv('AI_PORT');
         $data = [
             'move_number' => $this->turn,
             'hand' => $this->hand,
