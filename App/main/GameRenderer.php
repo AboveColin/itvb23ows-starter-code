@@ -12,6 +12,7 @@ class GameRenderer
         $top = ($q - $min_q) * 4 + $centerOffsetY;
         $stacked = $h > 1 ? 'stacked' : '';
         $innerTile = $tile[$h-1][1];
+        $tileType = strtolower($innerTile);
         
         // Construct the file path for the tile image
         $imagePath = "/" . $innerTile . ".png";
@@ -19,7 +20,7 @@ class GameRenderer
         // Display image and coordinates
         echo "<div class=\"tile $playerClass $stacked\"
                 style=\"left: {$left}em; top: {$top}em;\"
-                data-position=\"$pos\">";
+                data-position=\"$pos\" data-type=\"$tileType\">";
 
         echo "<img src=\"$imagePath\" alt=\"$innerTile\" class=\"tileImage\">";
         echo "<span class=\"coordinates\">($p,$q) $innerTile</span>";
@@ -158,8 +159,8 @@ class GameRenderer
         echo "<div class=\"tile move\" style=\"left: {$left}em; top: {$top}em;\">($p,$q)</div>";
     }
 
-    public function renderAntMoves($board, $gameLogic) {
-        $antMoves = $gameLogic->calculateAntMoves('0,0', $board, 0);
+    public function renderAntMoves($board, $gameLogic, $pos) {
+        $antMoves = $gameLogic->calculateAntMoves($pos, $board, 0);
 
         $min_p = 1000;
         $min_q = 1000;
@@ -176,8 +177,8 @@ class GameRenderer
         }
     }
 
-    public function renderSpiderMoves($board, $gameLogic) {
-        $spiderMoves = $gameLogic->calculateSpiderMoves('-1,1', $board, 0);
+    public function renderSpiderMoves($board, $gameLogic, $pos) {
+        $spiderMoves = $gameLogic->calculateSpiderMoves($pos, $board, 0);
 
         $min_p = 1000;
         $min_q = 1000;

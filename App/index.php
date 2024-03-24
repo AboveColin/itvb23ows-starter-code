@@ -10,7 +10,7 @@ use Colin\Hive\MoveCalculator;
 use Colin\Hive\GameValidator;
 use Colin\Hive\GameRenderer;
 
-$host = getenv('MYSQL_HOST') ?: 'localhost';
+$host = getenv('MYSQL_HOST') ?: 'ows-db';
 $user = getenv('MYSQL_USER') ?: 'root';
 $password = getenv('MYSQL_PASSWORD') ?: '';
 $database = getenv('MYSQL_DB') ?: 'hive';

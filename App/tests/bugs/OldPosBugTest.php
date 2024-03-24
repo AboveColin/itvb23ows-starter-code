@@ -19,30 +19,10 @@ class OldPosBugTest extends TestCase {
     private $moveCalculator;
 
     protected function setUp(): void {
-        /**
-         * $this->db = $this->createMock(Database::class); 
-         *
-         *
-         * $stmt = $this->createMock(mysqli_stmt::class);
-         * $stmt->method('bind_param')->willReturn(true);
-         * $stmt->method('execute')->willReturn(true);
-         * $this->db->method('prepare')->willReturn($stmt);
-         *
-         * $this->gameLogic = new GameLogic();
-         * $this->game = new Game($this->db, $this->gameLogic);
-         *
-         * $_SESSION['board'] = [];
-         * $_SESSION['player'] = 0;
-         * $_SESSION['hand'] = [
-         *     0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
-         *     1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
-         * ];
-         */
-        
-        $host = 'db';
-        $user = 'root';
-        $password = '123456';
-        $database = 'hive';
+         $host = getenv('MYSQL_HOST');
+         $user = getenv('MYSQL_USER');
+         $password = getenv('MYSQL_PASSWORD');
+         $database = getenv('MYSQL_DB');
 
         $this->db = new Database($host, $user, $password, $database);
         $this->gameLogic = new BaseGameLogic();

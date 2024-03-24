@@ -44,10 +44,10 @@ class QueenBugTest extends TestCase
          *     1 => ['A' => 2],
          * ];
          */
-        $host = 'db';
-        $user = 'root';
-        $password = '123456';
-        $database = 'hive';
+        $host = getenv('MYSQL_HOST');
+        $user = getenv('MYSQL_USER');
+        $password = getenv('MYSQL_PASSWORD');
+        $database = getenv('MYSQL_DB');
 
         $this->db = new Database($host, $user, $password, $database);
         $this->gameLogic = new BaseGameLogic();

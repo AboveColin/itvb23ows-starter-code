@@ -83,7 +83,7 @@ class GameController {
 
     public function aiMove() {
 
-        $url = 'http://' . getenv('AI_HOST') . getenv('AI_PORT');
+        $url = 'http://' . getenv('AI_HOST') . ":" . getenv('AI_PORT');
         $data = [
             'move_number' => $this->turn,
             'hand' => $this->hand,
@@ -114,7 +114,7 @@ class GameController {
             $this->checkGameEnd();
             $_SESSION['turn'] += 1;
 
-            // anders natuurlijk via deze functie
+            // Anders natuurlijk via deze functie, maar logic mocht worden overgeslagen
             // $this->play($response[1], $response[2]);
         } elseif ($response[0] === "move") {
             $_SESSION['board'][$response[2]] = [[$_SESSION['player'], $response[1]]];
@@ -123,7 +123,8 @@ class GameController {
             $this->insertMove($response[1], $response[2]);
             $this->checkGameEnd();
             $_SESSION['turn'] += 1;
-            // anders natuurlijk via deze functie
+
+            // Anders natuurlijk via deze functie, maar logic mocht worden overgeslagen
             // $this->move($response[1], $response[2]);
         } else {
             $_SESSION['board'][$response[2]] = [[$_SESSION['player'], $response[1]]];
@@ -378,6 +379,7 @@ class GameController {
             $_SESSION['turn'] += 1;
         }
         
+        #bug fix 4
         if (empty($board[$from])) {
             unset($board[$from]);
         }

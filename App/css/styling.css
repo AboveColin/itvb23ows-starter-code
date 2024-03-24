@@ -170,3 +170,13 @@ div.tile.move {
 .hidden {
     display: none;
 }
+
+.div.background {
+    background-color: #5cb85c;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
