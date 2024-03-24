@@ -149,53 +149,48 @@ if (!count($moveto)) {
         </div>
     </body>
     <script>
-
         document.addEventListener('DOMContentLoaded', function() {
+
+            var currentPlayer = <?php echo json_encode($player); ?>;
+            var playerClass = currentPlayer === 1 ? 'player1' : 'player0';
+
             const AIMoveButton = document.querySelector('input[value="AIMove"]');
             AIMoveButton.addEventListener('click', function() {
                 document.getElementById('loadingScreen').style.display = 'flex';
             });
-        });
 
-        document.addEventListener('DOMContentLoaded', function() {
             const fromSelect = document.querySelector('#from');
-            const fromtoSelect = document.querySelector('#fromTo');
-            const tiles = document.querySelectorAll('.tile');
+            const tiles = document.querySelectorAll(`.tile.${playerClass}`);
 
-            fromSelect.addEventListener('change', function() {
-                // Remove existing highlights
-                tiles.forEach(tile => {
-                    if (tile.style.border === '2px solid red') {
-                        tile.style.border = '';
-                    }
-                });
+            const removeExistingHighlights = () => {
+                tiles.forEach(
+                    tile => tile.style.border = tile.style.border === '2px solid red' ? '' : tile.style.border
+                    );
+            };
 
-                // Highlight the selected tile
-                const selectedPosition = this.value;
-                const selectedTile = document.querySelector(`.tile[data-position="${selectedPosition}"]`);
+            const highlightTile = (position) => {
+                const selectedTile = document.querySelector(`.tile[data-position="${position}"].${playerClass}`);
                 if (selectedTile) {
                     selectedTile.style.border = '2px solid red';
                 }
-            });
-            for (let i = 0; i < tiles.length; i++) {
-                // only for non ghost tiles
-                if (tiles[i].dataset.position !== undefined) {
-                    tiles[i].addEventListener('click', function() {
-                        const selectedPosition = this.dataset.position;
-                        fromSelect.value = selectedPosition;
-
-                        // Remove existing highlights
-                        tiles.forEach(tile => {
-                            if (tile.style.border === '2px solid red') {
-                                tile.style.border = '';
-                            }
-                        });
-
-                        // Highlight the selected tile
-                        this.style.border = '2px solid red';
-                    });
-                }
             };
+
+            fromSelect.addEventListener('change', function() {
+                removeExistingHighlights();
+                highlightTile(this.value);
+            });
+
+            tiles.forEach(tile => {
+                tile.addEventListener('click', function() {
+                    if (!this.classList.contains(playerClass)) {
+                        return;
+                    }
+                    fromSelect.value = this.dataset.position;
+                    removeExistingHighlights();
+                    this.style.border = '2px solid red';
+                });
+            });
         });
     </script>
+
 </html>
