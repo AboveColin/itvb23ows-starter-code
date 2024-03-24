@@ -3,7 +3,7 @@ version: '3.8'
 services:
   app:
     hostname: ows-app
-    build: app/
+    build: App/
     ports:
       - "8000:80"
     depends_on:
