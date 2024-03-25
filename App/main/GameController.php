@@ -284,112 +284,148 @@ class GameController {
         $_SESSION['last_move'] = $this->db->insertId();
     }
 
+    private function isValidSpecialPieceMove($from, $to, $board, $player) {
+        $tile = $board[$from][count($board[$from])-1];
+        switch($tile[1]) {
+            case "G":
+                return $this->moveCalculator->isValidGrasshopperMove($from, $to, $board);
+            case "A":
+                return $this->moveCalculator->checkIfMoveinCalculatedArray(
+                    $to,
+                    $this->moveCalculator->calculateAntMoves($from, $board, $player)
+                );
+            case "S":
+                return $this->moveCalculator->checkIfMoveinCalculatedArray(
+                    $to,
+                    $this->moveCalculator->calculateSpiderMoves($from, $board, $player)
+                );
+            default:
+                return true;
+        }
+    }
+
+    private function positionNotEmpty($from, $board) {
+        if (!isset($board[$from])) {
+            $_SESSION['error'] = 'Board position is empty';
+            return false;
+        }
+        return true;
+    }
+
+    private function tileOwnedByPlayer($from, $board, $player) {
+        if ($board[$from][count($board[$from])-1][0] != $player) {
+            $_SESSION['error'] = "Tile is not owned by player";
+            return false;
+        }
+        return true;
+    }
+
+    private function queenBeePlayed($player) {
+        $hand = $_SESSION['hand'][$player];
+        if ($hand['Q']) {
+            $_SESSION['error'] = "Queen bee is not played";
+            return false;
+        }
+        return true;
+    }
+
+    private function hiveRemainsConnected($from, $to, $board) {
+        // Simulate the move for connectivity check
+        $tile = array_pop($board[$from]);
+        $tempBoard = $board; // Create a copy of the current board state
+        unset($tempBoard[$from]); // Remove the tile from its original position
+        $tempBoard[$to][] = $tile; // Simulate the tile's new position
+
+        if (!$this->gameLogic->isHiveConnected($tempBoard)) {
+            $_SESSION['error'] = "Move would split hive";
+            return false;
+        }
+        return true;
+    }
+
+    private function checkifHasNeighbour($to, $board) {
+        if (!$this->gameLogic->hasNeighbour($to, $board)) {
+            $_SESSION['error'] = "Move would split hive";
+            return false;
+        }
+        return true;
+    }
+
+    private function checkIfMoved($from, $to) {
+        if ($from == $to) {
+            $_SESSION['error'] = 'Tile must move';
+            return false;
+        }
+        return true;
+    }
+
+    private function checkStackMove($from, $to, $board) {
+        $tile = $board[$from][count($board[$from])-1];
+        if ($tile[1] != "B" && isset($board[$to])) {
+            $_SESSION['error'] = 'Tile not empty';
+            return false;
+        }
+        return true;
+    }
+
+    private function checkSlide($from, $to, $board) {
+        $tile = $board[$from][count($board[$from])-1];
+        if (in_array($tile[1], ["Q", "B"]) && !$this->moveCalculator->slide($board, $from, $to)) {
+            $_SESSION['error'] = 'Tile must slide';
+            return false;
+        }
+        return true;
+    }
+
+    private function validateMove($from, $to, $board, $player) {
+        return $this->positionNotEmpty($from, $board) &&
+            $this->tileOwnedByPlayer($from, $board, $player) &&
+            $this->queenBeePlayed($player) &&
+            $this->isValidSpecialPieceMove($from, $to, $board, $player) &&
+            $this->hiveRemainsConnected($from, $to, $board) &&
+            $this->checkifHasNeighbour($to, $board) &&
+            $this->checkIfMoved($from, $to) &&
+            $this->checkStackMove($from, $to, $board);
+    }
+
 
     
     public function move($from, $to) {
         $player = $_SESSION['player'];
         $board = $_SESSION['board'];
-        $hand = $_SESSION['hand'][$player];
         
         // Clear any previous error
         unset($_SESSION['error']);
         
         // Validations for the move
-        if (!isset($board[$from])) {
-            $_SESSION['error'] = 'Board position is empty';
+        if (!$this->validateMove($from, $to, $board, $player)) {
             return;
-        }
-        if ($board[$from][count($board[$from])-1][0] != $player) {
-            $_SESSION['error'] = "Tile is not owned by player";
-            return;
-        }
-        if ($hand['Q']) {
-            $_SESSION['error'] = "Queen bee is not played";
-            return;
-        }
-
-        $tile = array_pop($board[$from]);
-        $this->board[$to][] = $tile;
-
-        switch($tile[1]) {
-            case "G":
-                if (!$this->moveCalculator->isValidGrasshopperMove($from, $to, $board)) {
-                    $_SESSION['error'] = "Invalid grasshopper move";
-                    $board[$from][] = $tile; // Return the tile to its original position
-                    return;
-                }
-                break;
-            case "A":
-                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
-                        $to,
-                        $this->moveCalculator->calculateAntMoves($from, $board, $player)
-                    )) {
-
-                        $_SESSION['error'] = "Invalid ant move";
-                        $board[$from][] = $tile; // Return the tile to its original position
-                        return;
-                }
-                break;
-            case "S":
-                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
-                        $to,
-                        $this->moveCalculator->calculateSpiderMoves($from, $board, $player)
-                    )) {
-
-                        $_SESSION['error'] = "Invalid spider move";
-                        $board[$from][] = $tile; // Return the tile to its original position
-                        return;
-                }
-                break;
-            default:
-                break;
-        }
-
-        // hive connected validation
-        // simulate the move and check if it's valid
-        $tempBoard = $board; // Create a copy of the current board state
-        unset($tempBoard[$from]); // Remove the tile from its original position
-        $tempBoard[$to] = [$tile]; // Simulate the tile's new position
-
-        // Now check if the hive is connected after the simulated move
-        if (!$this->gameLogic->isHiveConnected($tempBoard)) {
-            $_SESSION['error'] = "Move would split hive";
-            $board[$from][] = $tile; // Return the tile to its original position
-        }
-
-        if (!$this->gameLogic->hasNeighbour($to, $board)) {
-            $_SESSION['error'] = "Move would split hive";
-            $board[$from][] = $tile; // Return the tile to its original position
-        }
-        
-        
-        // More validations and actual move
-        if ($from == $to) {
-            $_SESSION['error'] = 'Tile must move';
-        } elseif (isset($board[$to]) && $tile[1] != "B") {
-            $_SESSION['error'] = 'Tile not empty';
-        } elseif (in_array($tile[1], ["Q", "B"]) && !$this->moveCalculator->slide($board, $from, $to)) {
-            $_SESSION['error'] = 'Tile must slide';
         } else {
             // Finalizing the move
+            $tile = array_pop($board[$from]);
+            $this->board[$to][] = $tile;
+            
             $board[$to] = isset($board[$to]) ? array_merge($board[$to], [$tile]) : [$tile];
             $_SESSION['player'] = 1 - $_SESSION['player'];
             $this->insertMove($from, $to);
             $this->checkGameEnd();
             $_SESSION['turn'] += 1;
-        }
-        
-        #bug fix 4
-        if (empty($board[$from])) {
-            unset($board[$from]);
+
+            #bug fix 4
+            if (empty($board[$from])) {
+                unset($board[$from]);
+            }
         }
 
-        if (!isset($_SESSION['error'])) {
-            $_SESSION['board'] = $board;
-        } else {
-            // If there's an error, revert the tile to its original position
-            $board[$from][] = $tile;
-        }
+        
+        
+
+        // if (!isset($_SESSION['error'])) {
+        //     $_SESSION['board'] = $board;
+        // } else {
+        //     // If there's an error, revert the tile to its original position
+            
+        // }
     }
 
     public function checkGameEnd() {
