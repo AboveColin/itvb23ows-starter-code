@@ -326,11 +326,13 @@ class GameController {
     }
 
     public function specialMoveValidation($from, $to, $board, $player, $tile) {
+        $isValid = true;
+
         switch($tile[1]) {
             case "G":
                 if (!$this->moveCalculator->isValidGrasshopperMove($from, $to, $board)) {
                     $_SESSION['error'] = "Invalid grasshopper move";
-                    return false;
+                    $isValid = false;
                 }
                 break;
             case "A":
@@ -338,9 +340,9 @@ class GameController {
                         $to,
                         $this->moveCalculator->calculateAntMoves($from, $board, $player)
                     )) {
-
-                        $_SESSION['error'] = "Invalid ant move";
-                        return false;
+    
+                    $_SESSION['error'] = "Invalid ant move";
+                    $isValid = false;
                 }
                 break;
             case "S":
@@ -348,23 +350,22 @@ class GameController {
                         $to,
                         $this->moveCalculator->calculateSpiderMoves($from, $board, $player)
                     )) {
-
-                        $_SESSION['error'] = "Invalid spider move";
-                        return false;
+    
+                    $_SESSION['error'] = "Invalid spider move";
+                    $isValid = false;
                 }
                 break;
             default:
                 break;
         }
-        return true;
+        return $isValid;
     }
 
 
     public function move($from, $to) {
         $player = $_SESSION['player'];
         $board = $_SESSION['board'];
-        $hand = $_SESSION['hand'][$player];
-        
+
         // Clear any previous error
         unset($_SESSION['error']);
         

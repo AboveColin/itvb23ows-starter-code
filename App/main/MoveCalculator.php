@@ -87,52 +87,51 @@ class MoveCalculator extends BaseGameLogic {
     }
 
     public function isValidGrasshopperMove($from, $to, $board) : bool {
-        $isValid = false; // Initialize the validity of the move as false
+        if ($from === $to) {
+            return false;
+        }
         
-        if ($from !== $to) {
-            $fromCoords = explode(',', $from);
-            $toCoords = explode(',', $to);
-            $direction = [$toCoords[0] - $fromCoords[0], $toCoords[1] - $fromCoords[1]];
-    
-            // Check for straight line movement
-            $gcd = $this->gcd(abs($direction[0]), abs($direction[1]));
-            if ($gcd !== 0) {
-                $direction[0] /= $gcd;
-                $direction[1] /= $gcd;
+        [$direction, $gcd] = $this->calculateLine($from, $to);
+        if ($gcd === 0) {
+            return false;
+        }
+        
+        return $this->isMoveValidAlongPath($from, $to, $direction, $board);
+    }
+
+    private function calculateLine($from, $to) {
+        $fromCoords = explode(',', $from);
+        $toCoords = explode(',', $to);
+        $direction = [$toCoords[0] - $fromCoords[0], $toCoords[1] - $fromCoords[1]];
+        
+        $gcd = $this->gcd(abs($direction[0]), abs($direction[1]));
+        if ($gcd !== 0) {
+            $direction[0] /= $gcd;
+            $direction[1] /= $gcd;
+        }
+
+        return [$direction, $gcd];
+    }
+
+    private function isMoveValidAlongPath($from, $to, $direction, $board) {
+        $currentPosition = explode(',', $from);
+        $hasJumped = false;
+        
+        while (true) {
+            $currentPosition[0] += $direction[0];
+            $currentPosition[1] += $direction[1];
+            $currentPosKey = implode(',', $currentPosition);
+
+            if ($currentPosKey === $to) {
+                return $hasJumped && !isset($board[$currentPosKey]);
             }
-    
-            $currentPosition = $fromCoords;
-            $hasJumped = false;
-            while (true) {
-                $currentPosition[0] += $direction[0];
-                $currentPosition[1] += $direction[1];
-                $currentPosKey = implode(',', $currentPosition);
-    
-                if ($currentPosKey === $to) {
-                    if ($hasJumped && isset($board[$currentPosKey])) {
-                        // Invalid if the destination is occupied
-                        $isValid = false;
-                    } else {
-                        // Valid if it has jumped and the destination is not occupied
-                        $isValid = $hasJumped;
-                    }
-                    break;
-                } elseif (!isset($board[$currentPosKey])) {
-                    if ($hasJumped) {
-                        // If it has already jumped and finds an empty space, the move is valid
-                        $isValid = true;
-                    } else {
-                        // If it hasnt jumped yet, the move is invalid
-                        $isValid = false;
-                    }
-                    break;
-                } else {
-                    $hasJumped = true; // Mark that it has jumped over a stone
-                }
+            
+            if (!isset($board[$currentPosKey])) {
+                return $hasJumped; // If it has already jumped and finds an empty space, the move is valid
+            } else {
+                $hasJumped = true; // Mark that it has jumped over a stone
             }
         }
-    
-        return $isValid;
     }
 
     public function calculateGrasshopperMoves($from, $board) {

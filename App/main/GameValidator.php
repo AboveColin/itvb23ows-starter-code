@@ -12,44 +12,50 @@ class GameValidator extends BaseGameLogic {
         $this->moveCalculator = new MoveCalculator();
     }
 
-    public function hasValidMoves($board, $hand, $player) {
+    
 
+    public function hasValidMoves($board, $hand, $player) {
         foreach (array_keys($hand[$player]) as $tile) {
-            if ($hand[$player][$tile] > 0) {
-                foreach (array_keys($board) as $pos) {
-                    if ($board[$pos][count($board[$pos]) - 1][0] == $player) {
-                        if ($tile == 'A') {
-                            $calculatedMoves = $this->moveCalculator->calculateAntMoves(
-                                $pos, $board, $player);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        } elseif ($tile == 'S') {
-                            $calculatedMoves = $this->moveCalculator->calculateSpiderMoves(
-                                $pos, $board, $player);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        } elseif ($tile == 'G') {
-                            $calculatedMoves = $this->moveCalculator->calculateGrasshopperMoves(
-                                $pos, $board);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        } else {
-                            $calculatedMoves = $this->moveCalculator->calculatePositions(
-                                $board, $this->getOffsets(), $player);
-                            if (!empty($calculatedMoves)) {
-                                return true;
-                            }
-                        }
-                    }
+            if ($hand[$player][$tile] > 0 && $this->findValidMovesForTile($tile, $board, $player)) {
+                    return true;
+            }
+        }
+    
+        return false; // No valid moves found
+    }
+    
+    private function findValidMovesForTile($tile, $board, $player) {
+        foreach (array_keys($board) as $pos) {
+            if ($board[$pos][count($board[$pos]) - 1][0] == $player) {
+                switch ($tile) {
+                    case 'A':
+                        $calculatedMoves = $this->moveCalculator->calculateAntMoves($pos, $board, $player);
+                        break;
+                    case 'S':
+                        $calculatedMoves = $this->moveCalculator->calculateSpiderMoves($pos, $board, $player);
+                        break;
+                    case 'G':
+                        $calculatedMoves = $this->moveCalculator->calculateGrasshopperMoves($pos, $board);
+                        break;
+                    default:
+                        $calculatedMoves = $this->moveCalculator->calculatePositions(
+                            $board,
+                            $this->getOffsets(),
+                            $player
+                        );
+                        break;
+                }
+                
+                if (!empty($calculatedMoves)) {
+                    return true;
                 }
             }
         }
-
-        return false; // No valid moves found
+    
+        return false;
     }
+    
+    
 
 
     // Win check functions
