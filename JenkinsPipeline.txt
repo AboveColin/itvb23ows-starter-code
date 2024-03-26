@@ -1,0 +1,265 @@
+Started by user Colin
+Obtained Jenkinsfile from git https://github.com/AboveColin/itvb23ows-starter-code
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/OWS
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/OWS/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/AboveColin/itvb23ows-starter-code # timeout=10
+Fetching upstream changes from https://github.com/AboveColin/itvb23ows-starter-code
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.2'
+ > git fetch --tags --force --progress -- https://github.com/AboveColin/itvb23ows-starter-code +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/dev^{commit} # timeout=10
+Checking out Revision 70231f36640ba317e63fec028d414af89dd66b09 (refs/remotes/origin/dev)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 70231f36640ba317e63fec028d414af89dd66b09 # timeout=10
+Commit message: "Small fix AIMove"
+ > git rev-list --no-walk e05fc6c7280bc0510038f5caaef99ac36fec40be # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (SCM)
+[Pipeline] echo
+Checking out code...
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/OWS/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/AboveColin/itvb23ows-starter-code # timeout=10
+Fetching upstream changes from https://github.com/AboveColin/itvb23ows-starter-code
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.2'
+ > git fetch --tags --force --progress -- https://github.com/AboveColin/itvb23ows-starter-code +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/dev^{commit} # timeout=10
+Checking out Revision 70231f36640ba317e63fec028d414af89dd66b09 (refs/remotes/origin/dev)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 70231f36640ba317e63fec028d414af89dd66b09 # timeout=10
+Commit message: "Small fix AIMove"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (phpunit tests)
+[Pipeline] sh
++ php -v
+PHP 8.2.7 (cli) (built: Jun  9 2023 19:37:27) (NTS)
+Copyright (c) The PHP Group
+Zend Engine v4.2.7, Copyright (c) Zend Technologies
+    with Zend OPcache v8.2.7, Copyright (c), by Zend Technologies
+[Pipeline] sh
++ composer --version
+Composer version 2.5.5 2023-03-21 11:50:05
+[Pipeline] sh
++ composer install --working-dir /var/jenkins_home/workspace/OWS/App
+Installing dependencies from lock file (including require-dev)
+Verifying lock file contents can be installed on current platform.
+Nothing to install, update or remove
+Generating autoload files
+24 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+[Pipeline] sh
++ chmod +x /var/jenkins_home/workspace/OWS/App/vendor/bin/phpunit
+[Pipeline] sh
++ /var/jenkins_home/workspace/OWS/App/vendor/bin/phpunit --version
+PHPUnit 11.0.4 by Sebastian Bergmann and contributors.
+
+[Pipeline] sh
++ /var/jenkins_home/workspace/OWS/App/vendor/bin/phpunit --configuration /var/jenkins_home/workspace/OWS/App/phpunit.xml
+PHPUnit 11.0.4 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.7
+Configuration: /var/jenkins_home/workspace/OWS/App/phpunit.xml
+
+.........................                                         25 / 25 (100%)
+
+Time: 00:00.079, Memory: 8.00 MB
+
+OK (25 tests, 50 assertions)
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (SonarQube Analysis)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] tool
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] withSonarQubeEnv
+Injecting SonarQube environment variables using the configuration: OWS
+[Pipeline] {
+[Pipeline] sh
++ /var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/OWS/bin/sonar-scanner
+INFO: Scanner configuration file: /var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/OWS/conf/sonar-scanner.properties
+INFO: Project root configuration file: /var/jenkins_home/workspace/OWS/sonar-project.properties
+INFO: SonarScanner 5.0.1.3006
+INFO: Java 17.0.10 Eclipse Adoptium (64-bit)
+INFO: Linux 5.10.102.1-microsoft-standard-WSL2 amd64
+INFO: User cache: /var/jenkins_home/.sonar/cache
+INFO: Analyzing on SonarQube server 10.3.0.82913
+INFO: Default locale: "en", source code encoding: "UTF-8" (analysis is platform dependent)
+INFO: Load global settings
+INFO: Load global settings (done) | time=319ms
+INFO: Server id: 147B411E-AY4-hoqfXnnE76KB0jiz
+INFO: User cache: /var/jenkins_home/.sonar/cache
+INFO: Load/download plugins
+INFO: Load plugins index
+INFO: Load plugins index (done) | time=157ms
+INFO: Load/download plugins (done) | time=398ms
+INFO: Process project properties
+INFO: Process project properties (done) | time=1ms
+INFO: Execute project builders
+INFO: Execute project builders (done) | time=1ms
+INFO: Project key: OWS
+INFO: Base dir: /var/jenkins_home/workspace/OWS
+INFO: Working dir: /var/jenkins_home/workspace/OWS/.scannerwork
+INFO: Load project settings for component key: 'OWS'
+INFO: Load project settings for component key: 'OWS' (done) | time=36ms
+INFO: Auto-configuring with CI 'Jenkins'
+INFO: Load quality profiles
+INFO: Load quality profiles (done) | time=166ms
+INFO: Load active rules
+INFO: Load active rules (done) | time=5978ms
+INFO: Load analysis cache
+INFO: Load analysis cache (404) | time=15ms
+INFO: Load project repositories
+INFO: Load project repositories (done) | time=38ms
+INFO: Indexing files...
+INFO: Project configuration:
+INFO: 38 files indexed
+INFO: 1659 files ignored because of scm ignore settings
+INFO: Quality profile for css: Sonar way
+INFO: Quality profile for docker: Sonar way
+INFO: Quality profile for json: Sonar way
+INFO: Quality profile for php: Sonar way
+INFO: Quality profile for xml: Sonar way
+INFO: Quality profile for yaml: Sonar way
+INFO: ------------- Run sensors on module OWS
+INFO: Load metrics repository
+INFO: Load metrics repository (done) | time=48ms
+INFO: Sensor JaCoCo XML Report Importer [jacoco]
+INFO: 'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml
+INFO: No report imported, no coverage information will be imported by JaCoCo XML Report Importer
+INFO: Sensor JaCoCo XML Report Importer [jacoco] (done) | time=6ms
+INFO: Sensor IaC CloudFormation Sensor [iac]
+INFO: 0 source files to be analyzed
+INFO: 0/0 source files have been analyzed
+INFO: Sensor IaC CloudFormation Sensor [iac] (done) | time=29ms
+INFO: Sensor IaC Kubernetes Sensor [iac]
+INFO: 0 source files to be analyzed
+INFO: 0/0 source files have been analyzed
+INFO: Sensor IaC Kubernetes Sensor [iac] (done) | time=10ms
+INFO: Sensor IaC AzureResourceManager Sensor [iac]
+INFO: 0 source files to be analyzed
+INFO: 0/0 source files have been analyzed
+INFO: Sensor IaC AzureResourceManager Sensor [iac] (done) | time=104ms
+INFO: Sensor JavaScript inside YAML analysis [javascript]
+INFO: No input files found for analysis
+INFO: Hit the cache for 0 out of 0
+INFO: Miss the cache for 0 out of 0
+INFO: Sensor JavaScript inside YAML analysis [javascript] (done) | time=8ms
+INFO: Sensor CSS Rules [javascript]
+INFO: Detected os: Linux arch: amd64 alpine: false. Platform: LINUX_X64
+INFO: Using Node.js executable: 'node'.
+INFO: Memory configuration: OS (24002 MB), Node.js (4144 MB).
+INFO: 1 source file to be analyzed
+INFO: 1/1 source file has been analyzed
+INFO: Hit the cache for 0 out of 0
+INFO: Miss the cache for 0 out of 0
+INFO: Sensor CSS Rules [javascript] (done) | time=7581ms
+INFO: Sensor CSS Metrics [javascript]
+INFO: Sensor CSS Metrics [javascript] (done) | time=67ms
+INFO: Sensor C# Project Type Information [csharp]
+INFO: Sensor C# Project Type Information [csharp] (done) | time=1ms
+INFO: Sensor C# Analysis Log [csharp]
+INFO: Sensor C# Analysis Log [csharp] (done) | time=27ms
+INFO: Sensor C# Properties [csharp]
+INFO: Sensor C# Properties [csharp] (done) | time=0ms
+INFO: Sensor HTML [web]
+INFO: Sensor HTML [web] (done) | time=68ms
+INFO: Sensor XML Sensor [xml]
+INFO: 1 source file to be analyzed
+INFO: 1/1 source file has been analyzed
+INFO: Sensor XML Sensor [xml] (done) | time=170ms
+INFO: Sensor PHP sensor [php]
+INFO: Starting PHP symbol indexer
+INFO: 17 source files to be analyzed
+INFO: 17/17 source files have been analyzed
+INFO: Cached information of global symbols will be used for 0 out of 17 files. Global symbols were recomputed for the remaining files.
+INFO: Starting PHP rules
+INFO: 17 source files to be analyzed
+INFO: 17/17 source files have been analyzed
+INFO: The PHP analyzer was able to leverage cached data from previous analyses for 0 out of 17 files. These files were not parsed.
+INFO: Sensor PHP sensor [php] (done) | time=2663ms
+INFO: Sensor Analyzer for "php.ini" files [php]
+INFO: Sensor Analyzer for "php.ini" files [php] (done) | time=2ms
+INFO: Sensor PHPUnit report sensor [php]
+INFO: No PHPUnit tests reports provided (see 'sonar.php.tests.reportPath' property)
+INFO: No PHPUnit coverage reports provided (see 'sonar.php.coverage.reportPaths' property)
+WARN: PHPUnit test cases are detected. Make sure to specify test sources via `sonar.test` to get more precise analysis results.
+INFO: Sensor PHPUnit report sensor [php] (done) | time=5ms
+INFO: Sensor TextAndSecretsSensor [text]
+INFO: 25 source files to be analyzed
+INFO: 25/25 source files have been analyzed
+INFO: Sensor TextAndSecretsSensor [text] (done) | time=905ms
+INFO: Sensor VB.NET Project Type Information [vbnet]
+INFO: Sensor VB.NET Project Type Information [vbnet] (done) | time=1ms
+INFO: Sensor VB.NET Analysis Log [vbnet]
+INFO: Sensor VB.NET Analysis Log [vbnet] (done) | time=29ms
+INFO: Sensor VB.NET Properties [vbnet]
+INFO: Sensor VB.NET Properties [vbnet] (done) | time=1ms
+INFO: Sensor IaC Docker Sensor [iac]
+INFO: 4 source files to be analyzed
+INFO: 4/4 source files have been analyzed
+INFO: Sensor IaC Docker Sensor [iac] (done) | time=171ms
+INFO: ------------- Run sensors on project
+INFO: Sensor Analysis Warnings import [csharp]
+INFO: Sensor Analysis Warnings import [csharp] (done) | time=2ms
+INFO: Sensor Zero Coverage Sensor
+INFO: Sensor Zero Coverage Sensor (done) | time=24ms
+INFO: SCM Publisher SCM provider for this project is: git
+INFO: SCM Publisher 10 source files to be analyzed
+INFO: SCM Publisher 10/10 source files have been analyzed (done) | time=175ms
+INFO: CPD Executor Calculating CPD for 17 files
+INFO: CPD Executor CPD calculation finished (done) | time=25ms
+INFO: Analysis report generated in 85ms, dir size=362.0 kB
+INFO: Analysis report compressed in 101ms, zip size=151.7 kB
+INFO: Analysis report uploaded in 86ms
+INFO: ANALYSIS SUCCESSFUL, you can find the results at: http://172.22.0.2:9000/dashboard?id=OWS
+INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+INFO: More about the report processing at http://172.22.0.2:9000/api/ce/task?id=AY56pqWumjyu6joxToDe
+INFO: Analysis total time: 23.605 s
+INFO: ------------------------------------------------------------------------
+INFO: EXECUTION SUCCESS
+INFO: ------------------------------------------------------------------------
+INFO: Total time: 26.869s
+INFO: Final Memory: 22M/96M
+INFO: ------------------------------------------------------------------------
+[Pipeline] }
+[Pipeline] // withSonarQubeEnv
+[Pipeline] echo
+SonarQube analysis completed
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy)
+[Pipeline] echo
+Deploying...
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
