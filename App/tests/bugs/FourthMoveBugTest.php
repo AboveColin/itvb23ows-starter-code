@@ -34,10 +34,10 @@ class FourthMoveBugTest extends TestCase {
                 1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
             ];
         } else {
-            $host = 'localhost';
-            $user = 'root';
-            $password = '123456';
-            $database = 'hive';
+            $host = getenv('MYSQL_HOST');
+            $user = getenv('MYSQL_USER');
+            $password = getenv('MYSQL_PASSWORD');
+            $database = getenv('MYSQL_DB');
             
             $this->db = new Database($host, $user, $password, $database);
             $this->gameLogic = new GameLogic();
