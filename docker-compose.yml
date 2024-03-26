@@ -11,7 +11,7 @@ services:
     environment:
       - MYSQL_HOST=172.99.0.2
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=<password>
+      - MYSQL_PASSWORD=123456
       - MYSQL_DB=hive
       - AI_HOST=172.99.0.4
       - AI_PORT=5000
@@ -27,7 +27,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=<password>
+      - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=hive
       - MYSQL_USER=root
     volumes:
@@ -62,7 +62,7 @@ services:
       - JENKIN_PORT=8080
       - MYSQL_HOST=172.99.0.2
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=<password>
+      - MYSQL_PASSWORD=123456
       - MYSQL_DB=hive
     networks:
       ows:
