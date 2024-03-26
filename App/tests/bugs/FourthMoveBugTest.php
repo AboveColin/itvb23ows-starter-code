@@ -19,43 +19,44 @@ class FourthMoveBugTest extends TestCase {
     private $moveCalculator;
 
     protected function setUp(): void {
-        $this->db = $this->createMock(Database::class);
-        $this->gameLogic = new BaseGameLogic();
-        $this->gameValidator = new GameValidator();
-        $this->moveCalculator = new MoveCalculator();
-        $this->game = new GameController($this->db, $this->gameLogic, $this->moveCalculator, $this->gameValidator);
+        $mock = true;
+        if ($mock) {
+            $this->db = $this->createMock(Database::class);
+            $this->gameLogic = new BaseGameLogic();
+            $this->gameValidator = new GameValidator();
+            $this->moveCalculator = new MoveCalculator();
+            $this->game = new GameController($this->db, $this->gameLogic, $this->moveCalculator, $this->gameValidator);
 
-        $_SESSION['board'] = [];
-        $_SESSION['player'] = 0;
-        $_SESSION['hand'] = [
+            $_SESSION['board'] = [];
+            $_SESSION['player'] = 0;
+            $_SESSION['hand'] = [
+                0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
+                1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
+            ];
+        } else {
+            $host = 'localhost';
+            $user = 'root';
+            $password = '123456';
+            $database = 'hive';
+            
+            $this->db = new Database($host, $user, $password, $database);
+            $this->gameLogic = new GameLogic();
+            $this->game = new Game($this->db, $this->gameLogic);
+            
+            $_SESSION['board'] = [];
+            
+            $_SESSION['player'] = 0;
+            
+            $_SESSION['hand'] = [
             0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
             1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
-        ];
-        /**
-         * $host = 'localhost';
-         * $user = 'root';
-         * $password = '123456';
-         * $database = 'hive';
-         *
-         * $this->db = new Database($host, $user, $password, $database);
-         * $this->gameLogic = new GameLogic();
-         * $this->game = new Game($this->db, $this->gameLogic);
-         *
-         * $_SESSION['board'] = [];
-         *
-         * $_SESSION['player'] = 0;
-         *
-         * $_SESSION['hand'] = [
-         *   0 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3],
-         *   1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
-         * ];
-         *
-         * $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-         * $_SESSION['game_id'] = $this->db->insertId();
-         * 
-         * $_SESSION['last_move'] = 0;
-         */
-        
+            ];
+            
+            $this->db->prepare('INSERT INTO games VALUES ()')->execute();
+            $_SESSION['game_id'] = $this->db->insertId();
+            
+            $_SESSION['last_move'] = 0;
+        }
     }
 
     public function testQueenBeemustBePlayedByTheFourthMove() {
