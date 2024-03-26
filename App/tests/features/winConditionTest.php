@@ -1,13 +1,19 @@
 <?php
 
-use Colin\Hive\GameLogic;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 use PHPUnit\Framework\TestCase;
 
-class winConditionTest extends TestCase {
+class WinConditionTest extends TestCase {
     private $gameLogic;
+    private $gameValidator;
+    private $moveCalculator;
 
     protected function setUp(): void {
-        $this->gameLogic = new GameLogic();
+        $this->gameLogic = new BaseGameLogic();
+        $this->gameValidator = new GameValidator();
+        $this->moveCalculator = new MoveCalculator();
     }
 
     public function testIsNeighbour() {
@@ -25,7 +31,7 @@ class winConditionTest extends TestCase {
             '1,-1' => [[1, 'B']],
             '-1,1' => [[1, 'B']],
         ];
-        $this->assertTrue($this->gameLogic->isQueenSurrounded($board, 0));
+        $this->assertTrue($this->gameValidator->isQueenSurrounded($board, 0));
     }
 
     public function testIsDraw() {
@@ -42,10 +48,10 @@ class winConditionTest extends TestCase {
             '0,2' => [[1, 'B']],
             '-2,2' => [[1, 'B']],
         ];
-        $this->assertTrue($this->gameLogic->isDraw($board));
+        $this->assertTrue($this->gameValidator->isDraw($board));
 
         // Add a test case where it's not a draw
         $board['0,0'] = [[0, 'A']]; // Change the Queen to an Ant
-        $this->assertFalse($this->gameLogic->isDraw($board));
+        $this->assertFalse($this->gameValidator->isDraw($board));
     }
 }

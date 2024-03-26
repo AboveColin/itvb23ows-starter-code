@@ -2,21 +2,26 @@
 namespace Colin\Hive;
 session_start();
 
-require 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
 use Colin\Hive\Database;
-use Colin\Hive\Game;
-use Colin\Hive\GameLogic;
+use Colin\Hive\GameController;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\MoveCalculator;
+use Colin\Hive\GameValidator;
 use Colin\Hive\GameRenderer;
 
-$host = getenv('MYSQL_HOST') ?: 'localhost';
+$host = getenv('MYSQL_HOST') ?: '172.99.0.2';
 $user = getenv('MYSQL_USER') ?: 'root';
 $password = getenv('MYSQL_PASSWORD') ?: '';
 $database = getenv('MYSQL_DB') ?: 'hive';
 
 $db = new Database($host, $user, $password, $database);
-$gameLogic = new GameLogic();
-$game = new Game($db, $gameLogic);
+$gameLogic = new BaseGameLogic();
+$moveCalculator = new MoveCalculator();
+$gameValidator = new GameValidator();
+$game = new GameController($db, $gameLogic, $moveCalculator, $gameValidator);
 $gameRenderer = new GameRenderer();
+
 
 if (!isset($_SESSION['board'])) {
     $game->restart();
@@ -31,7 +36,7 @@ $player = $game->getPlayer();
 $hand = $game->getHand();
 
 // Bug fix 1
-$to = $gameLogic->calculatePositions($board, $gameLogic->getOffsets(), $player);
+$to = $moveCalculator->calculatePositions($board, $gameLogic->getOffsets(), $player);
 
 
 $moveto = [];
@@ -43,11 +48,13 @@ foreach ($gameLogic->getOffsets() as $pq) {
 }
 
 $moveto = array_unique($moveto);
-if (!count($moveto)) $moveto[] = '0,0';
+if (!count($moveto)) {
+    $moveto[] = '0,0';
+}
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Hive</title>
     <link rel="stylesheet" href="/css/styling.css">
@@ -63,18 +70,18 @@ if (!count($moveto)) $moveto[] = '0,0';
             <?php $gameRenderer->renderBoard($board); ?>
         </div>
     <div class="hand">White:
-        <?php 
-            $gameRenderer->renderHand($hand, 0); 
+        <?php
+            $gameRenderer->renderHand($hand, 0);
         ?>
     </div>
-    <div class="hand">Black: 
-        <?php 
-            $gameRenderer->renderHand($hand, 1); 
+    <div class="hand">Black:
+        <?php
+            $gameRenderer->renderHand($hand, 1);
         ?>
     </div>
-    <div class="turn">Turn: 
-        <?php 
-            $gameRenderer->displayTurn($player); 
+    <div class="turn">Turn:
+        <?php
+            $gameRenderer->displayTurn($player);
         ?>
     </div>
         <form method="post" action="index.php" name="GameAction">
@@ -115,19 +122,19 @@ if (!count($moveto)) $moveto[] = '0,0';
         <hr>
         <div class="actionButtons">
             <form method="post" action="index.php">
-                <input type="hidden" name="AIMove" value="true">
+                <input area-hidden="true" name="AIMove" value="true" class="hidden">
                 <input type="submit" value="AIMove">
             </form>
             <form method="post" action="index.php">
-                <input type="hidden" name="pass" value="true">
+                <input area-hidden="true" name="pass" value="true" class="hidden">
                 <input type="submit" value="Pass">
             </form>
             <form method="post" action="index.php">
-                <input type="hidden" name="restart" value="true">
+                <input area-hidden="true" name="restart" value="true" class="hidden">
                 <input type="submit" value="Restart">
             </form>
             <form method="post" action="index.php">
-                <input type="hidden" name="undo" value="true">
+                <input area-hidden="true" name="undo" value="true" class="hidden">
                 <input type="submit" value="Undo">
             </form>
         </div>
@@ -142,53 +149,48 @@ if (!count($moveto)) $moveto[] = '0,0';
         </div>
     </body>
     <script>
-
         document.addEventListener('DOMContentLoaded', function() {
+
+            var currentPlayer = <?php echo json_encode($player); ?>;
+            var playerClass = currentPlayer === 1 ? 'player1' : 'player0';
+
             const AIMoveButton = document.querySelector('input[value="AIMove"]');
             AIMoveButton.addEventListener('click', function() {
                 document.getElementById('loadingScreen').style.display = 'flex';
             });
-        });
 
-        document.addEventListener('DOMContentLoaded', function() {
             const fromSelect = document.querySelector('#from');
-            const fromtoSelect = document.querySelector('#fromTo');
-            const tiles = document.querySelectorAll('.tile');
+            const tiles = document.querySelectorAll(`.tile.${playerClass}`);
 
-            fromSelect.addEventListener('change', function() {
-                // Remove existing highlights
-                tiles.forEach(tile => {
-                    if (tile.style.border === '2px solid red') {
-                        tile.style.border = '';
-                    }
-                });
+            const removeExistingHighlights = () => {
+                tiles.forEach(
+                    tile => tile.style.border = tile.style.border === '2px solid red' ? '' : tile.style.border
+                    );
+            };
 
-                // Highlight the selected tile
-                const selectedPosition = this.value;
-                const selectedTile = document.querySelector(`.tile[data-position="${selectedPosition}"]`);
+            const highlightTile = (position) => {
+                const selectedTile = document.querySelector(`.tile[data-position="${position}"].${playerClass}`);
                 if (selectedTile) {
                     selectedTile.style.border = '2px solid red';
                 }
-            });
-            for (let i = 0; i < tiles.length; i++) {
-                // only for non ghost tiles 
-                if (tiles[i].dataset.position !== undefined) {
-                    tiles[i].addEventListener('click', function() {
-                        const selectedPosition = this.dataset.position;
-                        fromSelect.value = selectedPosition;
-
-                        // Remove existing highlights
-                        tiles.forEach(tile => {
-                            if (tile.style.border === '2px solid red') {
-                                tile.style.border = '';
-                            }
-                        });
-
-                        // Highlight the selected tile
-                        this.style.border = '2px solid red';
-                    });
-                }
             };
+
+            fromSelect.addEventListener('change', function() {
+                removeExistingHighlights();
+                highlightTile(this.value);
+            });
+
+            tiles.forEach(tile => {
+                tile.addEventListener('click', function() {
+                    if (!this.classList.contains(playerClass)) {
+                        return;
+                    }
+                    fromSelect.value = this.dataset.position;
+                    removeExistingHighlights();
+                    this.style.border = '2px solid red';
+                });
+            });
         });
     </script>
+
 </html>

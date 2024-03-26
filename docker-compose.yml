@@ -2,40 +2,49 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    hostname: ows-app
+    build: App/
     ports:
       - "8000:80"
     depends_on:
       - db
     environment:
-      - MYSQL_HOST=db
+      - MYSQL_HOST=172.99.0.2
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=123456
+      - MYSQL_PASSWORD=<password>
       - MYSQL_DB=hive
+      - AI_HOST=172.99.0.4
+      - AI_PORT=5000
     networks:
-    - default
+      ows:
+          ipv4_address: 172.99.0.3
     volumes:
       - ./App:/var/www/html
 
   db:
+    hostname: ows-db
     image: mysql:8.0.33
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_ROOT_PASSWORD=<password>
       - MYSQL_DATABASE=hive
+      - MYSQL_USER=root
     volumes:
       - db_data:/var/lib/mysql
       - ./Database/hive.sql:/docker-entrypoint-initdb.d/hive.sql
     networks:
-    - default
+      ows:
+          ipv4_address: 172.99.0.2
 
   ai:
+    hostname: ows-ai
     build: ./AI
     ports:
-      - "5000:5000"
+      - "5001:5000"
     networks:
-    - default
+      ows:
+          ipv4_address: 172.99.0.4
     volumes:
       - ./AI:/app
     environment:
@@ -43,30 +52,37 @@ services:
       - FLASK_APP=app.py
 
   jenkins:
+    hostname: ows-jenkins
     build:
       dockerfile: Jenkins/Dockerfile
     ports:
       - "8080:8080"
       - "50000:50000"
     environment:
-      JENKINS_ADMIN_ID: root
-      JENKINS_ADMIN_PASSWORD: root
-      JENKIN_PORT: 8080
+      - JENKIN_PORT=8080
+      - MYSQL_HOST=172.99.0.2
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=<password>
+      - MYSQL_DB=hive
     networks:
-    - default
-    - jenkins
+      ows:
+          ipv4_address: 172.99.0.5
+      jenkins:
     volumes:
       - jenkins-data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client
     
   sonarqube:
+    hostname: ows-sonarqube
     build: ./SonarQube
     image: sonarqube:latest
     ports:
       - "9000:9000"
     networks:
-    - default
-    - jenkins
+      ows:
+          ipv4_address: 172.99.0.6
+      jenkins:
+
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
@@ -83,5 +99,11 @@ volumes:
   sonarqube_temp:
 
 networks:
+  ows:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.99.0.0/16
+          gateway: 172.99.0.1
   default:
   jenkins:

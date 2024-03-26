@@ -1,10 +1,12 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use Colin\Hive\Game;
-use Colin\Hive\GameLogic;
+use Colin\Hive\GameController;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 use Colin\Hive\Database;
 
-class bug5Test extends TestCase {
+class UndoBugTest extends TestCase {
     /*
     5. De undo-functionaliteit werkt nog niet goed. De oude zeAen worden nog niet
         verwijderd, en de toestand van het bord wordt niet altijd goed hersteld. Bovendien
@@ -14,17 +16,26 @@ class bug5Test extends TestCase {
     private $game;
     private $db;
     private $gameLogic;
+    private $gameValidator;
+    private $moveCalculator;
+
+    private function insertIntodb() {
+        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
+        $_SESSION['game_id'] = $this->db->insertId();
+        return $_SESSION['game_id'];
+    }
 
     protected function setUp(): void
     {
-        $host = 'db';
-        $user = 'root';
-        $password = '123456';
-        $database = 'hive';
+        $host = getenv('MYSQL_HOST');
+        $user = getenv('MYSQL_USER');
+        $password = getenv('MYSQL_PASSWORD');
+        $database = getenv('MYSQL_DB');
 
         $this->db = new Database($host, $user, $password, $database);
-        $this->gameLogic = new GameLogic();
-        $this->game = new Game($this->db, $this->gameLogic);
+        $this->gameLogic = new BaseGameLogic();
+        $this->moveCalculator = new MoveCalculator();
+        $this->game = new GameController($this->db, $this->gameLogic, $this->moveCalculator, $this->gameValidator);
 
         $_SESSION['board'] = [];
 
@@ -35,18 +46,18 @@ class bug5Test extends TestCase {
             1 => ["Q" => 1, "B" => 2, "S" => 2, "A" => 3, "G" => 3]
         ];
 
-        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insert_id();
+        $_SESSION['game_id'] = $this->insertIntodb();
 
         $_SESSION['last_move'] = 0;
     }
+
+    
 
     public function testUndoWithoutMoves() {
         /*
             Test that the undo function produces an error when there are no moves to undo
         */
-        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insert_id();
+        $_SESSION['game_id'] = $this->insertIntodb();
 
         $_SESSION['last_move'] = 0;
         $_SESSION['board'] = [];
@@ -62,7 +73,8 @@ class bug5Test extends TestCase {
 
     public function TestundoWithMoves() {
         /*
-            Test that the undo function works correctly when there is a move to undo and the board is restored to the correct state
+            Test that the undo function works correctly when there is a move to undo
+            and the board is restored to the correct state
         */
         $_SESSION['board'] = [
             '0,0' => [[0, 'Q']],
@@ -75,8 +87,7 @@ class bug5Test extends TestCase {
         ];
 
         // Create a new game
-        $this->db->prepare('INSERT INTO games VALUES ()')->execute();
-        $_SESSION['game_id'] = $this->db->insert_id();
+        $_SESSION['game_id'] = $this->insertIntodb();
         $_SESSION['last_move'] = 1;
 
         // Simulate moving the white queen

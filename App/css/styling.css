@@ -103,14 +103,10 @@ div.log {
     overflow-y: auto;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
-    border-radius: 4px;
     padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin: 20px 0;
     font-family: "Courier New", monospace;
     font-size: 0.9em;
     color: #333;
-    border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
@@ -169,4 +165,18 @@ div.tile.move {
     justify-content: center; 
     color: white; 
     font-size: 24px;
+}
+
+.hidden {
+    display: none;
+}
+
+.div.background {
+    background-color: #5cb85c;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
 }

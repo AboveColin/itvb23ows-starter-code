@@ -1,15 +1,21 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Colin\Hive\GameLogic;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 
-class mierTest extends TestCase
+class MierTest extends TestCase
 {
     private $gameLogic;
+    private $gameValidator;
+    private $moveCalculator;
 
     protected function setUp(): void
     {
-        $this->gameLogic = new GameLogic();
+        $this->gameLogic = new BaseGameLogic();
+        $this->gameValidator = new GameValidator();
+        $this->moveCalculator = new MoveCalculator();
     }
     
     public function testSoldierAntCanMoveUnlimited()
@@ -26,7 +32,7 @@ class mierTest extends TestCase
             '-1,2' => []
         ];
 
-        $validPositions = $this->gameLogic->calculateAntMoves('0,0', $board, 0);
+        $validPositions = $this->moveCalculator->calculateAntMoves('0,0', $board, 0);
 
         // Check if the Soldier Ant can move to a further locations
         $this->assertContains('2,0', $validPositions);
@@ -42,7 +48,7 @@ class mierTest extends TestCase
             '0,1' => [[1, 'Q']], // Non-empty field next to Soldier Ant
         ];
 
-        $validPositions = $this->gameLogic->calculateAntMoves('0,0', $board, 0);
+        $validPositions = $this->moveCalculator->calculateAntMoves('0,0', $board, 0);
 
         $this->assertNotContains('0,0', $validPositions);
     }
@@ -60,7 +66,7 @@ class mierTest extends TestCase
             '-1,2' => []
         ];
 
-        $validPositions = $this->gameLogic->calculateAntMoves('0,0', $board, 0);
+        $validPositions = $this->moveCalculator->calculateAntMoves('0,0', $board, 0);
 
         // Can move to '2,0' but not '0,1'
         $this->assertContains('2,0', $validPositions);
@@ -72,6 +78,3 @@ class mierTest extends TestCase
         session_unset();
     }
 }
-
-
-?>

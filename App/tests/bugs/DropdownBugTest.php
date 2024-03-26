@@ -1,16 +1,21 @@
 <?php
 
-use Colin\Hive\Game;
+
 use Colin\Hive\GameRenderer;
-use Colin\Hive\GameLogic;
+use Colin\Hive\GameController;
+use Colin\Hive\BaseGameLogic;
+use Colin\Hive\GameValidator;
+use Colin\Hive\MoveCalculator;
 use Colin\Hive\Database;
 use PHPUnit\Framework\TestCase;
 
-class bug1Test extends TestCase
+class DropdownBugTest extends TestCase
 {
     private $game;
     private $gameRenderer;
     private $gameLogic;
+    private $moveCalculator;
+    private $gameValidator;
     /*
         1. De dropdown die aangeeft welke stenen een speler kan plaatsen bevat ook stenen die
         de speler niet meer heeft. Bovendien bevat de dropdown die aangeeft waar een speler
@@ -21,8 +26,10 @@ class bug1Test extends TestCase
     protected function setUp(): void
     {
         $dbMock = $this->createMock(Database::class);
-        $this->gameLogic = new GameLogic();
-        $this->game = new Game($dbMock, $this->gameLogic);
+        $this->gameLogic = new BaseGameLogic();
+        $this->gameValidator = new GameValidator();
+        $this->moveCalculator = new MoveCalculator();
+        $this->game = new GameController($dbMock, $this->gameLogic, $this->moveCalculator, $this->gameValidator);
         $this->gameRenderer = new GameRenderer();
     }
     
@@ -47,7 +54,7 @@ class bug1Test extends TestCase
         */
         $board = ['0,0' => [[0, 'Q']]]; // state met de queen op 0,0
         $player = 0;
-        $validPositions = $this->gameLogic->calculatePositions($board, $this->gameLogic->getOffsets(), $player);
+        $validPositions = $this->moveCalculator->calculatePositions($board, $this->gameLogic->getOffsets(), $player);
         
         $expectedPositions = ['0,1', '1,0', '-1,1', '0,-1', '-1,0', '1,-1'];
         foreach ($expectedPositions as $position) {
