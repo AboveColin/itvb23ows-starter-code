@@ -385,7 +385,8 @@ class GameController {
             $this->hiveRemainsConnected($from, $to, $board) &&
             $this->checkifHasNeighbour($to, $board) &&
             $this->checkIfMoved($from, $to) &&
-            $this->checkStackMove($from, $to, $board);
+            $this->checkStackMove($from, $to, $board) &&
+            $this->checkSlide($from, $to, $board);
     }
 
 
@@ -398,9 +399,7 @@ class GameController {
         unset($_SESSION['error']);
         
         // Validations for the move
-        if (!$this->validateMove($from, $to, $board, $player)) {
-            return;
-        } else {
+        if ($this->validateMove($from, $to, $board, $player)) {
             // Finalizing the move
             $tile = array_pop($board[$from]);
             $this->board[$to][] = $tile;
@@ -416,7 +415,6 @@ class GameController {
                 unset($board[$from]);
             }
         }
-
         
         
 
