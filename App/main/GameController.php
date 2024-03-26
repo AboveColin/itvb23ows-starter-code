@@ -117,18 +117,20 @@ class GameController {
             // Anders natuurlijk via deze functie, maar logic mocht worden overgeslagen
             // $this->play($response[1], $response[2]);
         } elseif ($response[0] === "move") {
-            $_SESSION['board'][$response[2]] = [[$_SESSION['player'], $response[1]]];
-            $_SESSION['hand'][$this->turn % 2][$response[1]]--;
+            $from = $response[1];
+            $to = $response[2];
+            $board = $_SESSION['board'];
+            $board[$to] = $board[$from];
             $_SESSION['player'] = 1 - $_SESSION['player'];
-            $this->insertMove($response[1], $response[2]);
+            $this->insertMove($from, $to);
+            unset($board[$from]);
+            $_SESSION['board'] = $board;
             $this->checkGameEnd();
             $_SESSION['turn'] += 1;
 
             // Anders natuurlijk via deze functie, maar logic mocht worden overgeslagen
             // $this->move($response[1], $response[2]);
         } else {
-            $_SESSION['board'][$response[2]] = [[$_SESSION['player'], $response[1]]];
-            $_SESSION['hand'][$this->turn % 2][$response[1]]--;
             $_SESSION['player'] = 1 - $_SESSION['player'];
             $this->pass();
             $_SESSION['turn'] += 1;
@@ -284,6 +286,79 @@ class GameController {
         $_SESSION['last_move'] = $this->db->insertId();
     }
 
+    private function boardPositionEmpty($board, $from) {
+        if (!isset($board[$from])) {
+            $_SESSION['error'] = 'Board position is empty';
+            return false;
+        }
+        return true;
+    }
+
+    private function tileNotOwnedByPlayer($board, $from, $player) {
+        if ($board[$from][count($board[$from])-1][0] != $player) {
+            $_SESSION['error'] = "Tile is not owned by player";
+            return false;
+        }
+        return true;
+    }
+
+    private function queenBeenPlayed($hand) {
+        if ($hand['Q']) {
+            $_SESSION['error'] = "Queen bee is not played";
+            return false;
+        }
+        return true;
+    }
+
+    private function smallMoveValidation($from) {
+        $player = $_SESSION['player'];
+        $board = $_SESSION['board'];
+        $hand = $_SESSION['hand'][$player];
+
+        if (
+            !$this->boardPositionEmpty($board, $from) &&
+            !$this->tileNotOwnedByPlayer($board, $from, $player) &&
+            !$this->queenBeenPlayed($hand)
+            ) {
+            return false;
+        }
+        return true;
+    }
+
+    public function specialMoveValidation($from, $to, $board, $player, $tile) {
+        switch($tile[1]) {
+            case "G":
+                if (!$this->moveCalculator->isValidGrasshopperMove($from, $to, $board)) {
+                    $_SESSION['error'] = "Invalid grasshopper move";
+                    return false;
+                }
+                break;
+            case "A":
+                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
+                        $to,
+                        $this->moveCalculator->calculateAntMoves($from, $board, $player)
+                    )) {
+
+                        $_SESSION['error'] = "Invalid ant move";
+                        return false;
+                }
+                break;
+            case "S":
+                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
+                        $to,
+                        $this->moveCalculator->calculateSpiderMoves($from, $board, $player)
+                    )) {
+
+                        $_SESSION['error'] = "Invalid spider move";
+                        return false;
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
 
     public function move($from, $to) {
         $player = $_SESSION['player'];
@@ -294,54 +369,16 @@ class GameController {
         unset($_SESSION['error']);
         
         // Validations for the move
-        if (!isset($board[$from])) {
-            $_SESSION['error'] = 'Board position is empty';
-            return;
-        }
-        if ($board[$from][count($board[$from])-1][0] != $player) {
-            $_SESSION['error'] = "Tile is not owned by player";
-            return;
-        }
-        if ($hand['Q']) {
-            $_SESSION['error'] = "Queen bee is not played";
+        if (!$this->smallMoveValidation($from)) {
             return;
         }
 
         $tile = array_pop($board[$from]);
         $this->board[$to][] = $tile;
 
-        switch($tile[1]) {
-            case "G":
-                if (!$this->moveCalculator->isValidGrasshopperMove($from, $to, $board)) {
-                    $_SESSION['error'] = "Invalid grasshopper move";
-                    $board[$from][] = $tile; // Return the tile to its original position
-                    return;
-                }
-                break;
-            case "A":
-                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
-                        $to,
-                        $this->moveCalculator->calculateAntMoves($from, $board, $player)
-                    )) {
-
-                        $_SESSION['error'] = "Invalid ant move";
-                        $board[$from][] = $tile; // Return the tile to its original position
-                        return;
-                }
-                break;
-            case "S":
-                if (!$this->moveCalculator->checkIfMoveinCalculatedArray(
-                        $to,
-                        $this->moveCalculator->calculateSpiderMoves($from, $board, $player)
-                    )) {
-
-                        $_SESSION['error'] = "Invalid spider move";
-                        $board[$from][] = $tile; // Return the tile to its original position
-                        return;
-                }
-                break;
-            default:
-                break;
+        if (!$this->specialMoveValidation($from, $to, $board, $player, $tile)) {
+            $board[$from][] = $tile;
+            return;
         }
 
         // hive connected validation
